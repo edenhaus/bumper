@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
 
-import json
+import asyncio
 import logging
-import ssl
-import string
-import random
-import bumper
 import os
-from bumper.models import *
-from bumper import plugins
 from datetime import datetime, timedelta
 import asyncio
-from aiohttp import web
 import aiohttp
 import aiohttp_jinja2
 import jinja2
-import uuid
-import xml.etree.ElementTree as ET
+from aiohttp import web
+import ssl
 
+from bumper import plugins
+from bumper.models import *
+from .util import get_logger
 
 
 class aiohttp_filter(logging.Filter):
@@ -30,14 +26,14 @@ class aiohttp_filter(logging.Filter):
 
         if (
             record.levelno == 10
-            and logging.getLogger("confserver").getEffectiveLevel() == 10
+            and get_logger("confserver").getEffectiveLevel() == 10
         ):
             return True
         else:
             return False
 
 
-confserverlog = logging.getLogger("confserver")
+confserverlog = get_logger("confserver")
 logging.getLogger("aiohttp.access").addFilter(
     aiohttp_filter()
 )  # Add logging filter above to aiohttp.access
@@ -58,27 +54,27 @@ class ConfServer:
         return int(round(timetoconvert * 1000))
 
     def confserver_proxy_app(self):
-        
+
         self.app = web.Application(middlewares=[
             self.log_all_requests,
             ])
         aiohttp_jinja2.setup(self.app, loader=jinja2.FileSystemLoader(os.path.join(bumper.bumper_dir,"bumper","web","templates")))
-        
+
 
         self.app.add_routes(
             [
-                
-                web.get("/bot/remove/{did}", self.handle_RemoveBot, name='remove-bot'),       
-                web.get("/client/remove/{resource}", self.handle_RemoveClient, name='remove-client'),      
-                web.get("/restart_{service}", self.handle_RestartService, name='restart-service'),      
-                web.route("*", "/{path:.*}", self.handle_proxy, name="confserver_proxy"),        
+
+                web.get("/bot/remove/{did}", self.handle_RemoveBot, name='remove-bot'),
+                web.get("/client/remove/{resource}", self.handle_RemoveClient, name='remove-client'),
+                web.get("/restart_{service}", self.handle_RestartService, name='restart-service'),
+                web.route("*", "/{path:.*}", self.handle_proxy, name="confserver_proxy"),
             ]
         )
-        
+
         return self.app
 
     async def handle_proxy(self, request):
-        
+
         try:
             ecoresp = ""
 
@@ -87,12 +83,12 @@ class ConfServer:
                 if "_extra" in request.transport:
                     if "sockname" in request.transport._extra:
                         server_port = request.transport._extra["sockname"][1]
-           
+
             if request.raw_path == "/":
                 return await self.handle_base(request)
             if request.raw_path == "/lookup.do":
-                return await self.handle_lookup(request) #use bumper to handle lookup so bot gets Bumper IP and not Ecovacs  
-            
+                return await self.handle_lookup(request) #use bumper to handle lookup so bot gets Bumper IP and not Ecovacs
+
             matchproxy = bumper.config_proxyMode_getServerIP("app", request.host)
 
             if matchproxy:
@@ -117,11 +113,11 @@ class ConfServer:
                 ecorequest = f"{ecorequest}:{server_port}"
 
             proxymodelog.info(f"{request.host} - {ecorequest}")
-            ecorequest = f"{ecorequest}{request.path_qs}"    
+            ecorequest = f"{ecorequest}{request.path_qs}"
             requestheaders = {'host': request.host}
             async with aiohttp.ClientSession(headers=requestheaders, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
                 if request.content.total_bytes > 0:
-                    proxymodelog.info(f"HTTP Proxy Request to EcoVacs (body=true) (host:{request.host}) - {ecorequest} - {request._read_bytes}")            
+                    proxymodelog.info(f"HTTP Proxy Request to EcoVacs (body=true) (host:{request.host}) - {ecorequest} - {request._read_bytes}")
                     if request.content_type == "application/x-www-form-urlencoded": # android apps use form
                         fdata = await request.post()
                         async with session.request(request.method, ecorequest, data=fdata) as resp:
@@ -133,7 +129,7 @@ class ConfServer:
                         async with session.request(request.method, ecorequest, json=jdata) as resp:
                             ecoresp = await resp.text()
                             proxymodelog.info(f"HTTP Proxy Response from EcoVacs (URL: {ecorequest}) - (Status: {resp.status}) - {ecoresp}")
-                        
+
                 else:
                     proxymodelog.info(f"HTTP Proxy Request to EcoVacs (body=false) (host:{request.host}) - {ecorequest}")
                     async with session.request(request.method, ecorequest) as resp:
@@ -141,9 +137,9 @@ class ConfServer:
                             ecoresp = await resp.read()
                             proxymodelog.info(f"HTTP Proxy Response from EcoVacs (URL: {ecorequest}) - (Status: {resp.status}) - <BYTES CONTENT>")
                         else:
-                            ecoresp = await resp.text()  
+                            ecoresp = await resp.text()
                             proxymodelog.info(f"HTTP Proxy Response from EcoVacs (URL: {ecorequest}) - (Status: {resp.status}) - {ecoresp}")
-                    
+
                 if resp.status == 200:
                     if resp.content_type == "application/json":
                         ecoresp = json.loads(ecoresp)
@@ -152,10 +148,10 @@ class ConfServer:
                         return web.Response(body=ecoresp)
                     else:
                         return web.Response(text=ecoresp)
-            
+
                 else:
                     return web.Response(text=ecoresp)
-                    
+
         except asyncio.CancelledError as e:
             proxymodelog.error(f"Request cancelled or timeout - {ecorequest} - {jdata}")
             return web.Response(text="")
@@ -164,7 +160,7 @@ class ConfServer:
         except Exception as e:
             proxymodelog.exception("{}".format(e))
             return web.Response(text="")
-   
+
 
     def confserver_app(self):
         self.app = web.Application(loop=asyncio.get_event_loop(), middlewares=[
@@ -174,13 +170,12 @@ class ConfServer:
 
         self.app.add_routes(
             [
-                
-                web.get("", self.handle_base, name="base"),         
+                web.get("", self.handle_base, name="base"),
                 web.get("/bot/remove/{did}", self.handle_RemoveBot, name='remove-bot'),       
                 web.get("/client/remove/{resource}", self.handle_RemoveClient, name='remove-client'),      
                 web.get("/restart_{service}", self.handle_RestartService, name='restart-service'),                
                 web.post("/lookup.do", self.handle_lookup),
-        
+                web.post("/newauth.do", self.handle_newauth),
             ]
         )
 
@@ -222,7 +217,7 @@ class ConfServer:
 
  
     async def start_site(self, app, address='localhost', port=8080, usessl=False):
-        
+
         runner = web.AppRunner(app)
         self.runners.append(runner)
         await runner.setup()
@@ -243,12 +238,12 @@ class ConfServer:
             )
 
         await site.start()
-        
+
     def start_site_thread(self, app, address='localhost', port=8080, usessl=False):
         #test for new thread and loop
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         runner = web.AppRunner(app)
         self.runners.append(runner)
         #await runner.setup()
@@ -272,7 +267,7 @@ class ConfServer:
         #await site.start()
         #for thread test
         loop.run_until_complete(site.start())
-        loop.run_forever()        
+        loop.run_forever()
 
     async def start_server(self):
         try:
@@ -361,8 +356,18 @@ class ConfServer:
     async def log_all_requests(self, request, handler):
 
         if request._match_info.route.name not in self.excludelogging:
-            
+            to_log = {
+                "request": {
+                    "route_name": f"{request.match_info.route.name}",
+                    "method": f"{request.method}",
+                    "path": f"{request.path}",
+                    "query_string": f"{request.query_string}",
+                    "raw_path": f"{request.raw_path}",
+                    "raw_headers": f'{",".join(map("{}".format, request.raw_headers))}',
+                }
+            }
             try:
+                postbody = None
                 if request.content_length:
                     if request.content_type == "application/x-www-form-urlencoded":
                         postbody = await request.post()
@@ -376,100 +381,33 @@ class ConfServer:
                     
                     else:
                         postbody = await request.post()
-                else:
-                    postbody = None
+
+                to_log["request"]["body"] = f"{postbody}"
 
                 response = await handler(request)
-                if response:
-                    if not "application/octet-stream" in response.content_type:
-                        try:
-                            logall = {
-                                "request": {
-                                "route_name": f"{request.match_info.route.name}",
-                                "method": f"{request.method}",
-                                "path": f"{request.path}",
-                                "query_string": f"{request.query_string}",
-                                "raw_path": f"{request.raw_path}",
-                                "raw_headers": f'{",".join(map("{}".format, request.raw_headers))}',
-                                "body": f"{postbody}",
-                                    },
+                if response is None:
+                    confserverlog.warning("Response was null!")
+                    confserverlog.warning(json.dumps(to_log))
+                    return response
 
-                                "response": {
-                                #"response_body": f"{json.loads(response.body)}",
-                                "response_body": f"{json.loads(response.text)}",
-                                "status": f"{response.status}",
-                                }
-                                }
-                        except Exception as e:
-                            logall = {
-                            "request": {
-                            "route_name": f"{request.match_info.route.name}",
-                            "method": f"{request.method}",
-                            "path": f"{request.path}",
-                            "query_string": f"{request.query_string}",
-                            "raw_path": f"{request.raw_path}",
-                            "raw_headers": f'{",".join(map("{}".format, request.raw_headers))}',
-                            "body": f"{postbody}",
-                                },
+                to_log["response"] = {
+                    "status": f"{response.status}",
+                }
+                if not "application/octet-stream" in response.content_type:
+                    to_log["response"]["body"] = f"{json.loads(response.body)}"
 
-                            "response": {
-                            #"response_body": f"{json.loads(response.body)}",
-                            "response_body": f"{(response.text)}",
-                            "status": f"{response.status}",
-                            }
-                            }
-
-                    else:
-                        logall = {
-                            "request": {
-                            "route_name": f"{request.match_info.route.name}",
-                            "method": f"{request.method}",
-                            "path": f"{request.path}",
-                            "query_string": f"{request.query_string}",
-                            "raw_path": f"{request.raw_path}",
-                            "raw_headers": f'{",".join(map("{}".format, request.raw_headers))}',
-                            "body": f"{postbody}",
-                                },
-
-                            "response": {
-                            "status": f"{response.status}",
-                            }
-                            }   
-
-                    confserverlog.debug(json.dumps(logall))
+                confserverlog.debug(json.dumps(to_log))
                 
                 return response
 
             except web.HTTPNotFound as notfound:
                 confserverlog.debug("Request path {} not found".format(request.raw_path))
-                requestlog = {
-                    "request": {
-                    "route_name": f"{request.match_info.route.name}",
-                    "method": f"{request.method}",
-                    "path": f"{request.path}",
-                    "query_string": f"{request.query_string}",
-                    "raw_path": f"{request.raw_path}",
-                    "raw_headers": f'{",".join(map("{}".format, request.raw_headers))}',
-                    "body": f"{postbody}",
-                        }
-                }
-                confserverlog.debug(json.dumps(requestlog))
+                confserverlog.debug(json.dumps(to_log))
                 return notfound
 
             except Exception as e:
-                confserverlog.exception("{}".format(e))           
-                requestlog = {
-                    "request": {
-                    "route_name": f"{request.match_info.route.name}",
-                    "method": f"{request.method}",
-                    "path": f"{request.path}",
-                    "query_string": f"{request.query_string}",
-                    "raw_path": f"{request.raw_path}",
-                    "raw_headers": f'{",".join(map("{}".format, request.raw_headers))}',
-                    "body": f"{postbody}",
-                        }
-                }
-                confserverlog.debug(json.dumps(requestlog))
+                confserverlog.exception("{}".format(e))
+                confserverlog.error(json.dumps(to_log))
                 return e 
 
         else:
@@ -673,6 +611,26 @@ class ConfServer:
         except Exception as e:
             confserverlog.exception("{}".format(e))
 
+    async def handle_newauth(self, request):
+        # Bumper is only returning the submitted token. No reason yet to create another new token
+        try:
+            if request.content_type == "application/x-www-form-urlencoded":
+                postbody = await request.post()
+            else:
+                postbody = json.loads(await request.text())
+
+            confserverlog.debug(postbody)
+
+            body = {
+                "authCode": postbody["itToken"],
+                "result": "ok",
+                "todo": "result"
+            }
+
+            return web.json_response(body)
+
+        except Exception as e:
+            confserverlog.exception("{}".format(e))
 
     async def disconnect(self):
         try:

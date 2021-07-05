@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-import bumper
-from bumper.models import VacBotClient, VacBotDevice, BumperUser, EcoVacsHomeProducts
-from tinydb import TinyDB, Query
-from tinydb.storages import MemoryStorage
-from datetime import datetime, timedelta
-import os
 import json
 import logging
+import os
+from datetime import datetime, timedelta
 
+from tinydb import TinyDB, Query
 
-bumperlog = logging.getLogger("bumper")
+import bumper
+from .util import get_logger
+from bumper.models import VacBotClient, VacBotDevice, BumperUser, EcoVacsHomeProducts, OAuth
+
+bumperlog = get_logger("bumper")
 
 
 def db_file():
@@ -32,6 +33,7 @@ def db_get():
     db.table("clients", cache_size=0)
     db.table("bots", cache_size=0)
     db.table("tokens", cache_size=0)
+    db.table("oauth", cache_size=0)
     db.table("config_proxymode", cache_size=0)
 
     return db
@@ -64,13 +66,13 @@ def config_proxyMode_getServerIP(type, host):
         proxy = Query()
         if type == "mqtt_server":
             entry = proxyconfig.get((proxy.type == type))
-            
+
         else:
             entry = proxyconfig.get((proxy.type == type) & (proxy.host == host))
-        
+
         if entry:
             return entry["ip"]
-        
+
         else:
             proxylist = proxyconfig.search(Query())
             for proxy in proxylist: # check for sub matches
@@ -84,13 +86,13 @@ def config_proxyMode_countEntries():
     with opendb:
         config = opendb.table("config_proxymode")
         return len(config)
-        
+
 def config_proxyMode_getall():
     opendb = db_get()
     with opendb:
         config = opendb.table("config_proxymode")
         return config.search(Query())
-        
+
 
 def user_add(userid):
     newuser = BumperUser()
@@ -258,6 +260,55 @@ def user_revoke_authcode(userid, token, authcode):
             )
 
 
+def revoke_expired_oauths():
+    opendb = db_get()
+    with opendb:
+        table = opendb.table("oauth")
+        entries = table.all()
+
+        for i in entries:
+            oauth = OAuth(**i)
+            if datetime.now() >= datetime.fromisoformat(oauth.expire_at):
+                bumperlog.debug(
+                    "Removing oauth {} due to expiration".format(oauth.access_token)
+                )
+                table.remove(doc_ids=[i.doc_id])
+
+
+def user_revoke_expired_oauths(userid):
+    opendb = db_get()
+    with opendb:
+        table = opendb.table("oauth")
+        search = table.search(Query().userid == userid)
+        for i in search:
+            oauth = OAuth(**i)
+            if datetime.now() >= datetime.fromisoformat(oauth.expire_at):
+                bumperlog.debug(
+                    "Removing oauth {} due to expiration".format(oauth.access_token)
+                )
+                table.remove(doc_ids=[i.doc_id])
+
+
+def user_add_oauth(userid) -> OAuth:
+    user_revoke_expired_oauths(userid)
+    opendb = db_get()
+    with opendb:
+        table = opendb.table("oauth")
+        entry = table.get(Query().userid == userid)
+        if entry:
+            return OAuth(**entry)
+        else:
+            oauth = OAuth.create_new(userid)
+            bumperlog.debug("Adding oauth {} for userid {}".format(oauth.access_token, userid))
+            table.insert(oauth.toDB())
+            return oauth
+
+
+def token_by_authcode(authcode):
+    tokens = db_get().table("tokens")
+    return tokens.get(Query().authcode == authcode)
+
+
 def get_disconnected_xmpp_clients():
     clients = db_get().table("clients")
     Client = Query()
@@ -270,8 +321,8 @@ def check_authcode(uid, authcode):
     tmpauth = tokens.get(
         (Query().authcode == authcode)
         & (  # Match authcode
-            (Query().userid == uid.replace("fuid_", ""))
-            | (Query().userid == "fuid_{}".format(uid))
+                (Query().userid == uid.replace("fuid_", ""))
+                | (Query().userid == "fuid_{}".format(uid))
         )  # Userid with or without fuid_
     )
     if tmpauth:
@@ -302,8 +353,8 @@ def check_token(uid, token):
     tmpauth = tokens.get(
         (Query().token == token)
         & (  # Match token
-            (Query().userid == uid.replace("fuid_", ""))
-            | (Query().userid == "fuid_{}".format(uid))
+                (Query().userid == uid.replace("fuid_", ""))
+                | (Query().userid == "fuid_{}".format(uid))
         )  # Userid with or without fuid_
     )
     if tmpauth:
@@ -331,7 +382,7 @@ def bot_add(sn, did, devclass, resource, company):
     bot = bot_get(did)
     if not bot:  # Not existing bot in database
         if (
-            not devclass == "" or "@" not in sn or "tmp" not in sn
+                not devclass == "" or "@" not in sn or "tmp" not in sn
         ):  # try to prevent bad additions to the bot list
             bumperlog.info(
                 "Adding new bot with SN: {} DID: {}".format(newbot.name, newbot.did)
@@ -363,6 +414,21 @@ def bot_toEcoVacsHome_JSON(bot):  # EcoVacs Home
             bot["UILogicId"] = botprod["product"]["UILogicId"]
             bot["ota"] = botprod["product"]["ota"]
             bot["icon"] = botprod["product"]["iconUrl"]
+            bot["model"] = botprod["product"]["model"]
+            bot["pip"] = botprod["product"]["_id"]
+            bot["deviceName"] = botprod["product"]["name"]
+            bot["materialNo"] = botprod["product"]["materialNo"]
+            bot["product_category"] = "DEEBOT" if botprod["product"]["name"].startswith("DEEBOT") else "UNKNOWN"
+            # bot["updateInfo"] = {
+            #     "changeLog": "",
+            #     "needUpdate": False
+            # }
+            # bot["service"] = {
+            #     "jmq": "jmq-ngiot-eu.dc.ww.ecouser.net",
+            #     "mqs": "api-ngiot.dc-as.ww.ecouser.net"
+            # }
+            bot["status"] = 1 if bot["mqtt_connection"] or bot["xmpp_connection"] else 0
+
             return json.dumps(
                 bot, default=lambda o: o.__dict__, sort_keys=False
             )  # , indent=4)
@@ -410,13 +476,14 @@ def client_reset_connectionStatus():
     clients = db_get().table("clients")
     for client in clients:
         client_set_mqtt(client["resource"], False)
-        client_set_xmpp(client["resource"], False)        
+        client_set_xmpp(client["resource"], False)
 
 def client_remove(resource):
     clients = db_get().table("clients")
     client = client_get(resource)
     if client:
         clients.remove(doc_ids=[client.doc_id])
+
 
 def client_get(resource):
     clients = db_get().table("clients")

@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-
-from bumper.confserver import ConfServer
-from bumper.mqttserver import MQTTServer, MQTTHelperBot
-from bumper.xmppserver import XMPPServer
-from bumper.models import *
-from bumper.db import *
 import asyncio
-import os
-import logging
-from logging.handlers import RotatingFileHandler
-import socket
-import sys
-
 import importlib
 import pkgutil
-from pkgutil import extend_path
+import socket
+import sys
+from typing import Optional
+
+from bumper.confserver import ConfServer
+from bumper.db import *
+from bumper.models import *
+from bumper.mqttserver import MQTTServer, MQTTHelperBot
+from bumper.util import get_logger, log_to_stdout
+from bumper.xmppserver import XMPPServer
+
 
 def strtobool(strbool):
     if str(strbool).lower() in ["true", "1", "t", "y", "on", "yes"]:
@@ -26,8 +24,6 @@ def strtobool(strbool):
 # os.environ['PYTHONASYNCIODEBUG'] = '1' # Uncomment to enable ASYNCIODEBUG
 bumper_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
-log_to_stdout = os.environ.get("LOG_TO_STDOUT")
-
 # Set defaults from environment variables first
 # Folders
 if not log_to_stdout:
@@ -37,8 +33,6 @@ data_dir = os.environ.get("BUMPER_DATA") or os.path.join(bumper_dir, "data")
 os.makedirs(data_dir, exist_ok=True)  # Ensure data directory exists or create
 certs_dir = os.environ.get("BUMPER_CERTS") or os.path.join(bumper_dir, "certs")
 os.makedirs(certs_dir, exist_ok=True)  # Ensure data directory exists or create
-
-
 
 # Certs
 ca_cert = os.environ.get("BUMPER_CA") or os.path.join(certs_dir, "ca.crt")
@@ -50,21 +44,21 @@ bumper_listen = os.environ.get("BUMPER_LISTEN") or socket.gethostbyname(
     socket.gethostname()
 )
 
-
 bumper_announce_ip = os.environ.get("BUMPER_ANNOUNCE_IP") or bumper_listen
 
 # Other
 bumper_debug = strtobool(os.environ.get("BUMPER_DEBUG")) or False
 use_auth = False
 token_validity_seconds = 3600  # 1 hour
+oauth_validity_days = 15
 db = None
 bumper_proxy_mode = strtobool(os.environ.get("BUMPER_PROXY_MODE")) or False
 
-mqtt_server = None
-mqtt_helperbot = None
-conf_server = None
-conf_server_2 = None
-xmpp_server = None
+mqtt_server: Optional[MQTTServer] = None
+mqtt_helperbot: Optional[MQTTHelperBot] = None
+conf_server: Optional[ConfServer] = None
+conf_server_2: Optional[ConfServer] = None
+xmpp_server: Optional[XMPPServer] = None
 
 # Plugins
 sys.path.append(os.path.join(bumper_dir, "bumper", "plugins"))
@@ -78,122 +72,9 @@ discovered_plugins = {
 
 shutting_down = False
 
-# Set format for all logs
-logformat = logging.Formatter(
-    "[%(asctime)s] :: %(levelname)s :: %(name)s :: %(module)s :: %(funcName)s :: %(lineno)d :: %(message)s"
-)
-
-bumperlog = logging.getLogger("bumper")
-if not log_to_stdout:
-    bumper_rotate = RotatingFileHandler("logs/bumper.log", maxBytes=5000000, backupCount=5)
-    bumper_rotate.setFormatter(logformat)
-    bumperlog.addHandler(bumper_rotate)
-else: 
-    bumperlog.addHandler(logging.StreamHandler(sys.stdout))
-# Override the logging level
-# bumperlog.setLevel(logging.INFO)
-
-confserverlog = logging.getLogger("confserver")
-if not log_to_stdout:
-    conf_rotate = RotatingFileHandler(
-        "logs/confserver.log", maxBytes=5000000, backupCount=5
-    )
-    conf_rotate.setFormatter(logformat)
-    confserverlog.addHandler(conf_rotate)
-else:
-    confserverlog.addHandler(logging.StreamHandler(sys.stdout))
-# Override the logging level
-# confserverlog.setLevel(logging.INFO)
-
-mqttserverlog = logging.getLogger("mqttserver")
-if not log_to_stdout:
-    mqtt_rotate = RotatingFileHandler(
-        "logs/mqttserver.log", maxBytes=5000000, backupCount=5
-    )
-    mqtt_rotate.setFormatter(logformat)
-    mqttserverlog.addHandler(mqtt_rotate)
-else:
-    mqttserverlog.addHandler(logging.StreamHandler(sys.stdout))
-# Override the logging level
-# mqttserverlog.setLevel(logging.INFO)
-
-proxymodelog = logging.getLogger("proxymode")
-proxymode_rotate = RotatingFileHandler(
-    "logs/proxymode.log", maxBytes=5000000, backupCount=5
-)
-proxymode_rotate.setFormatter(logformat)
-proxymodelog.addHandler(proxymode_rotate)
-
-# Override the logging level
-# mqttserverlog.setLevel(logging.INFO)
-
-### Additional MQTT Logs
-translog = logging.getLogger("transitions")
-if not log_to_stdout:
-    translog.addHandler(mqtt_rotate)
-else:
-    translog.addHandler(logging.StreamHandler(sys.stdout))
-translog.setLevel(logging.CRITICAL + 1)  # Ignore this logger
-logging.getLogger("passlib").setLevel(logging.CRITICAL + 1)  # Ignore this logger
-brokerlog = logging.getLogger("hbmqtt.broker")
-#brokerlog.setLevel(
-#    logging.CRITICAL + 1
-#)  # Ignore this logger #There are some sublogs that could be set if needed (.plugins)
-if not log_to_stdout:
-    brokerlog.addHandler(mqtt_rotate)
-else:
-    brokerlog.addHandler(logging.StreamHandler(sys.stdout))
-protolog = logging.getLogger("hbmqtt.mqtt.protocol")
-#protolog.setLevel(
-#    logging.CRITICAL + 1
-#)  # Ignore this logger
-if not log_to_stdout:
-    protolog.addHandler(mqtt_rotate)
-else:
-    protolog.addHandler(logging.StreamHandler(sys.stdout))
-clientlog = logging.getLogger("hbmqtt.client")
-#clientlog.setLevel(logging.CRITICAL + 1)  # Ignore this logger
-if not log_to_stdout:
-    clientlog.addHandler(mqtt_rotate)
-else:
-    clientlog.addHandler(logging.StreamHandler(sys.stdout))
-helperbotlog = logging.getLogger("helperbot")
-if not log_to_stdout:
-    helperbot_rotate = RotatingFileHandler(
-        "logs/helperbot.log", maxBytes=5000000, backupCount=5
-    )
-    helperbot_rotate.setFormatter(logformat)
-    helperbotlog.addHandler(helperbot_rotate)
-else:
-    helperbotlog.addHandler(logging.StreamHandler(sys.stdout))
-# Override the logging level
-# helperbotlog.setLevel(logging.INFO)
-
-boterrorlog = logging.getLogger("boterror")
-if not log_to_stdout:
-    boterrorlog_rotate = RotatingFileHandler(
-        "logs/boterror.log", maxBytes=5000000, backupCount=5
-    )
-    boterrorlog_rotate.setFormatter(logformat)
-    boterrorlog.addHandler(boterrorlog_rotate)
-else:
-    boterrorlog.addHandler(logging.StreamHandler(sys.stdout))
-# Override the logging level
-# boterrorlog.setLevel(logging.INFO)
-
-xmppserverlog = logging.getLogger("xmppserver")
-if not log_to_stdout:
-    xmpp_rotate = RotatingFileHandler(
-        "logs/xmppserver.log", maxBytes=5000000, backupCount=5
-    )
-    xmpp_rotate.setFormatter(logformat)
-    xmppserverlog.addHandler(xmpp_rotate)
-else:
-    xmppserverlog.addHandler(logging.StreamHandler(sys.stdout))
-# Override the logging level
-# xmppserverlog.setLevel(logging.INFO)
-
+bumperlog = get_logger("bumper")
 logging.getLogger("asyncio").setLevel(logging.CRITICAL + 1)  # Ignore this logger
+proxymodelog =  get_logger("proxymode")
 
 # iptables -A PREROUTING -t nat -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 8883
 mqtt_listen_port = 8883
@@ -204,7 +85,7 @@ xmpp_listen_port = 5223
 
 async def start():
     #config_proxyMode_deleteTable() #delete existing proxymode table
-    
+
     #Reset xmpp/mqtt to false in database for bots and clients
     bot_reset_connectionStatus()
     client_reset_connectionStatus()
@@ -228,15 +109,15 @@ async def start():
         )
 
     if not bumper_listen:
-        logging.log(logging.FATAL, "No listen address configured")
+        bumperlog.fatal("No listen address configured")
         return
 
     if not (
-        os.path.exists(ca_cert)
-        and os.path.exists(server_cert)
-        and os.path.exists(server_key)
+            os.path.exists(ca_cert)
+            and os.path.exists(server_cert)
+            and os.path.exists(server_key)
     ):
-        logging.log(logging.FATAL, "Certificate(s) don't exist at paths specified")
+        bumperlog.fatal("Certificate(s) don't exist at paths specified")
         return
 
     bumperlog.info("Starting Bumper")
@@ -252,7 +133,8 @@ async def start():
     xmpp_server = XMPPServer((bumper_listen, xmpp_listen_port))
 
     # Start MQTT Server
-    asyncio.create_task(mqtt_server.broker_coro())
+    # await start otherwise we get an error connecting the helper bot
+    await asyncio.create_task(mqtt_server.broker_coro())
 
     await asyncio.sleep(0.5) #Wait half a sec for broker to start
 
@@ -271,11 +153,11 @@ async def start():
 
     # Start web servers
     if bumper_proxy_mode:
-        bumperlog.info("Proxy Mode Enabled")        
+        bumperlog.info("Proxy Mode Enabled")
         if config_proxyMode_countEntries() == 0: # check if proxymode servers are entered
             bumperlog.info("Proxy Mode - No Servers, Loading Defaults (US)")
             config_proxyMode_defaults() # set defaults if 0
-        
+
         configproxy = config_proxyMode_getall()
         cntentries = len(configproxy)
         proxymodelog.info(f"Loaded {cntentries} entries from proxyconfig")
@@ -297,6 +179,7 @@ async def start():
 
 async def maintenance():
     revoke_expired_tokens()
+    revoke_expired_oauths()
 
 
 async def shutdown():
@@ -330,57 +213,6 @@ async def shutdown():
         bumperlog.info("Shutdown complete")
 
 
-def create_certs():
-    import platform
-    import os
-    import subprocess
-    import sys
-
-    path = os.path.dirname(sys.modules[__name__].__file__)
-    path = os.path.join(path, "..")
-    sys.path.insert(0, path)
-
-    print("Creating certificates")
-    odir = os.path.realpath(os.curdir)
-    os.chdir("certs")
-    if str(platform.system()).lower() == "windows":
-        # run for win
-        subprocess.run([os.path.join("..", "create_certs", "create_certs_windows.exe")])
-    elif str(platform.system()).lower() == "darwin":
-        # run on mac
-        subprocess.run([os.path.join("..", "create_certs", "create_certs_osx")])
-    elif str(platform.system()).lower() == "linux":
-        if "arm" in platform.machine().lower() or "aarch64" in platform.machine().lower():
-            # run for pi
-            subprocess.run([os.path.join("..", "create_certs", "create_certs_rpi")])
-        else:
-            # run for linux
-            subprocess.run([os.path.join("..", "create_certs", "create_certs_linux")])
-
-    else:
-        os.chdir(odir)
-        logging.log(
-            logging.FATAL,
-            "Can't determine platform. Create certs manually and try again.",
-        )
-        return
-
-    print("Certificates created")
-    os.chdir(odir)
-
-    if "__main__.py" in sys.argv[0]:
-        os.execv(
-            sys.executable, ["python", "-m", "bumper"] + sys.argv[1:]
-        )  # Start again
-
-    else:
-        os.execv(sys.executable, ["python"] + sys.argv)  # Start again
-
-
-def first_run():
-    create_certs()
-
-
 def main(argv=None):
     import argparse
 
@@ -392,15 +224,16 @@ def main(argv=None):
     try:
 
         if not (
-            os.path.exists(ca_cert)
-            and os.path.exists(server_cert)
-            and os.path.exists(server_key)
+                os.path.exists(ca_cert)
+                and os.path.exists(server_cert)
+                and os.path.exists(server_key)
         ):
-            first_run()
-            return
+            msg = "No certs found! Please generate them (More infos in the docs)"
+            bumperlog.fatal(msg)
+            sys.exit(msg)
 
         if not (
-            os.path.exists(os.path.join(data_dir, "passwd"))
+                os.path.exists(os.path.join(data_dir, "passwd"))
         ):
             with open(os.path.join(data_dir, "passwd"), 'w'): pass
 
@@ -444,4 +277,3 @@ def main(argv=None):
 
     finally:
         asyncio.run(shutdown())
-

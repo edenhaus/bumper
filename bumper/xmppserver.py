@@ -9,8 +9,10 @@ import ssl
 import bumper
 import asyncio
 
-xmppserverlog = logging.getLogger("xmppserver")
-boterrorlog = logging.getLogger("boterror")
+from bumper import get_logger
+
+xmppserverlog = get_logger("xmppserver")
+boterrorlog = get_logger("boterror")
 
 
 class XMPPServer:

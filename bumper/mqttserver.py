@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 
-import logging
 import asyncio
+import json
 import os
+import time
+from datetime import datetime, timedelta
+
 from typing import Dict
 
 import hbmqtt
 import websockets
 from hbmqtt.broker import Broker
+
 from hbmqtt.client import MQTTClient, ConnectException
 from hbmqtt.mqtt.constants import QOS_0, QOS_1, QOS_2
 import pkg_resources
 import time
 import bumper
+from bumper.util import get_logger
 import json
 from datetime import datetime, timedelta
-import bumper
 from passlib.apps import custom_app_context as pwd_context
 import ssl
 import tempfile
@@ -28,16 +32,15 @@ from websockets.exceptions import InvalidHandshake
 from hbmqtt.mqtt.protocol.handler import ProtocolHandlerException
 from hbmqtt.mqtt.connack import CONNECTION_ACCEPTED
 
-helperbotlog = logging.getLogger("helperbot")
-boterrorlog = logging.getLogger("boterror")
-mqttserverlog = logging.getLogger("mqttserver")
-proxymodelog = logging.getLogger("proxymode")
+mqttserverlog = get_logger("mqttserver")
+helperbotlog = get_logger("helperbot")
+boterrorlog = get_logger("boterror")
+proxymodelog = get_logger("proxymode")
+
 
 class MQTTHelperBot:
-
     Client = None
-    wait_resp_timeout_seconds = 10
-    expire_msg_seconds = 10
+    wait_resp_timeout_seconds = 60
 
     def __init__(self, address):
         self.address = address
@@ -45,7 +48,6 @@ class MQTTHelperBot:
         self.command_responses = []
 
     async def start_helper_bot(self):
-
         try:
             if self.Client is None:
                 self.Client = MQTTClient(
@@ -58,29 +60,16 @@ class MQTTHelperBot:
             )
             await self.Client.subscribe(
                 [
-                    ("iot/#", QOS_0),                    
+                    ("iot/#", QOS_0),
                 ]
             )
-
-#        except ConnectionRefusedError as e:
-#            helperbotlog.Error(e)
-#            pass
-
-#        except asyncio.CancelledError as e:
-#            pass
-
-#        except hbmqtt.client.ConnectException as e:
-#            helperbotlog.Error(e)
-#            pass
-
         except Exception as e:
             helperbotlog.exception("{}".format(e))
 
     async def wait_for_resp(self, requestid):
         try:
-
             t_end = (
-                datetime.now() + timedelta(seconds=self.wait_resp_timeout_seconds)
+                    datetime.now() + timedelta(seconds=self.wait_resp_timeout_seconds)
             ).timestamp()
 
             while time.time() < t_end:
@@ -96,29 +85,17 @@ class MQTTHelperBot:
                             resp = {"id": requestid, "ret": "ok", "resp": resppayload}
                             self.command_responses.remove(msg)
                             return resp
-
-            return {
-                "id": requestid,
-                "errno": 500,
-                "ret": "fail",
-                "debug": "wait for response timed out",
-            }
-        except asyncio.CancelledError as e:
+        except asyncio.CancelledError:
             helperbotlog.debug("wait_for_resp cancelled by asyncio")
-            return {
-                "id": requestid,
-                "errno": 500,
-                "ret": "fail",
-                "debug": "wait for response timed out",
-            }
         except Exception as e:
             helperbotlog.exception("{}".format(e))
-            return {
-                "id": requestid,
-                "errno": 500,
-                "ret": "fail",
-                "debug": "wait for response timed out",
-            }
+
+        return {
+            "id": requestid,
+            "errno": 500,
+            "ret": "fail",
+            "debug": "wait for response timed out",
+        }
 
     async def send_command(self, cmdjson, requestid):
         if not self.Client._handler.writer is None:
@@ -131,27 +108,25 @@ class MQTTHelperBot:
                     requestid,
                     cmdjson["payloadType"],
                 )
-                try:
-                    if cmdjson["payloadType"] == "x":
-                        await self.Client.publish(
-                            ttopic, str(cmdjson["payload"]).encode(), QOS_0
-                        )
-
-                    if cmdjson["payloadType"] == "j":
-                        await self.Client.publish(
-                            ttopic, json.dumps(cmdjson["payload"]).encode(), QOS_0
-                        )
-
-                except Exception as e:
-                    helperbotlog.exception("{}".format(e))
+                if cmdjson["payloadType"] == "x":
+                    await self.Client.publish(
+                        ttopic, str(cmdjson["payload"]).encode(), QOS_0
+                    )
+                elif cmdjson["payloadType"] == "j":
+                    await self.Client.publish(
+                        ttopic, json.dumps(cmdjson["payload"]).encode(), QOS_0
+                    )
 
                 resp = await self.wait_for_resp(requestid)
-
                 return resp
-
             except Exception as e:
                 helperbotlog.exception("{}".format(e))
-                return {}
+                return {
+                    "id": requestid,
+                    "errno": 500,
+                    "ret": "fail",
+                    "debug": "exception occurred please check bumper logs",
+                }
 
 
 class MQTTServer:
@@ -162,19 +137,19 @@ class MQTTServer:
 
         mqttserverlog.info(
             "Starting MQTT Server at {}:{}".format(self.address[0], self.address[1])
-        )        
+        )
 
         try:
             await self.broker.start()
 
         except hbmqtt.broker.BrokerException as e:
             mqttserverlog.exception(e)
-            #asyncio.create_task(bumper.shutdown())
+            # asyncio.create_task(bumper.shutdown())
             pass
 
         except Exception as e:
             mqttserverlog.exception("{}".format(e))
-            #asyncio.create_task(bumper.shutdown())
+            # asyncio.create_task(bumper.shutdown())
             pass
 
     def __init__(self, address, **kwargs):
@@ -184,16 +159,16 @@ class MQTTServer:
             # Default config opts
             passwd_file = os.path.join(
                 os.path.join(bumper.data_dir, "passwd")
-            ) # For file auth, set user:hash in passwd file see (https://hbmqtt.readthedocs.io/en/latest/references/hbmqtt.html#configuration-example)
+            )  # For file auth, set user:hash in passwd file see (https://hbmqtt.readthedocs.io/en/latest/references/hbmqtt.html#configuration-example)
 
             allow_anon = False
 
             for key, value in kwargs.items():
-                if key == "password_file":            
+                if key == "password_file":
                     passwd_file = kwargs["password_file"]
-                
+
                 elif key == "allow_anonymous":
-                    allow_anon = kwargs["allow_anonymous"] # Set to True to allow anonymous authentication
+                    allow_anon = kwargs["allow_anonymous"]  # Set to True to allow anonymous authentication
 
             # The below adds a plugin to the hbmqtt.broker.plugins without having to futz with setup.py
             distribution = pkg_resources.Distribution("hbmqtt.broker.plugins")
@@ -216,7 +191,7 @@ class MQTTServer:
                 },
                 "sys_interval": 0,
                 "auth": {
-                    "allow-anonymous": allow_anon, 
+                    "allow-anonymous": allow_anon,
                     "password-file": passwd_file,
                     "plugins": ["bumper"],  # Bumper plugin provides auth and handling of bots/clients connecting
                 },
@@ -337,17 +312,17 @@ class BumperProxyModeMQTTClient(MQTTClient):
 
                 proxymodelog.info(
                     f"MQTT Proxy Client - Proxy Forward Message to Robot - Topic: {topic} - Message: {msgdata.encode()}")
-                await bumper.mqtt_helperbot.Client.publish(                    
+                await bumper.mqtt_helperbot.Client.publish(
                     topic, msgdata.encode(), QOS_0
                 )
-                
+
         except Exception as e:
             proxymodelog.error(f"MQTT Proxy Client - get_msg Exception - {e}")
 
 class BumperMQTTServer_Plugin:
     proxyclients: Dict[str, BumperProxyModeMQTTClient] = {}
     def __init__(self, context):
-        self.context = context        
+        self.context = context
         try:
             self.auth_config = self.context.config["auth"]
             self._users = dict()
@@ -360,11 +335,11 @@ class BumperMQTTServer_Plugin:
         except Exception as e:
             mqttserverlog.exception("{}".format(e))
 
-    
+
 
     async def authenticate(self, *args, **kwargs):
         authenticated = False
-        
+
         try:
             session = kwargs.get("session", None)
             username = session.username
@@ -374,7 +349,7 @@ class BumperMQTTServer_Plugin:
             if "@" in client_id:
                 didsplit = str(client_id).split("@")
                 if not (  # if ecouser or bumper aren't in details it is a bot
-                    "ecouser" in didsplit[1] or "bumper" in didsplit[1]
+                        "ecouser" in didsplit[1] or "bumper" in didsplit[1]
                 ):
                     tmpbotdetail = str(didsplit[1]).split("/")
                     bumper.bot_add(
@@ -384,7 +359,8 @@ class BumperMQTTServer_Plugin:
                         tmpbotdetail[1],
                         "eco-ng",
                     )
-                    mqttserverlog.info(f"Bumper Authentication Success - Bot - SN: {username} - DID: {didsplit[0]} - Class: {tmpbotdetail[0]}")                    
+                    mqttserverlog.info(f"Bumper Authentication Success - Bot - SN: {username} - DID: {didsplit[0]}"
+                                       f" - Class: {tmpbotdetail[0]}")
                     authenticated = True
 
                     if authenticated and bumper.bumper_proxy_mode:
@@ -395,13 +371,13 @@ class BumperMQTTServer_Plugin:
                             proxymodelog.error(f"MQTT Proxy Mode - No server found! Load defaults or set mqtt_server in config_proxymode table!")
                             proxymodelog.exception(f"MQTT Proxy Mode - Exiting due to no MQTT Server configured!")
                             exit(1)
-                        
+
                         proxymodelog.info(f"MQTT Proxy Mode - Proxy Bot to MQTT - Client_id: {client_id} - Username: {username}")
-      
+
                         self.proxyclients[client_id] = BumperProxyModeMQTTClient(
                             client_id=client_id, config={"check_hostname": False}
                         )
-                        
+
                         try:
                             await self.proxyclients[client_id].connect(
                                 f"mqtts://{username}:{password}@{mqtt_server}:443",
@@ -409,7 +385,7 @@ class BumperMQTTServer_Plugin:
                         except Exception as e:
                             mqttserverlog.error(f"MQTT Proxy Mode - Exception connecting with proxy to ecovacs - {e}")
                             pass
-                        proxymodelog.info(f"MQTT Proxy Mode - Proxy Bot Connected - Client_id: {client_id}")                        
+                        proxymodelog.info(f"MQTT Proxy Mode - Proxy Bot Connected - Client_id: {client_id}")
                         asyncio.create_task(self.proxyclients[client_id].get_msg())
 
 
@@ -422,32 +398,25 @@ class BumperMQTTServer_Plugin:
                     if userid == "helperbot":
                         mqttserverlog.info(f"Bumper Authentication Success - Helperbot: {client_id}")
                         authenticated = True
-                    else:
-                        auth = False
-                        if bumper.check_authcode(didsplit[0], password):
-                            auth = True
-                        elif bumper.use_auth == False:
-                            auth = True
-
-                        if auth:
-                            bumper.client_add(userid, realm, resource)
-                            mqttserverlog.info(f"Bumper Authentication Success - Client - Username: {username} - ClientID: {client_id}")
-                            authenticated = True
-
-                        else:
-                            authenticated = False
+                    elif bumper.check_authcode(didsplit[0], password) or not bumper.use_auth:
+                        bumper.client_add(userid, realm, resource)
+                        mqttserverlog.info(f"Bumper Authentication Success - Client - Username: {username} - "
+                                           f"ClientID: {client_id}")
+                        authenticated = True
 
             # Check for File Auth            
-            if username and not authenticated: # If there is a username and it isn't already authenticated
+            if username and not authenticated:  # If there is a username and it isn't already authenticated
                 hash = self._users.get(username, None)
-                if hash: # If there is a matching entry in passwd, check hash
+                if hash:  # If there is a matching entry in passwd, check hash
                     authenticated = pwd_context.verify(password, hash)
                     if authenticated:
-                        mqttserverlog.info(f"File Authentication Success - Username: {username} - ClientID: {client_id}")
+                        mqttserverlog.info(
+                            f"File Authentication Success - Username: {username} - ClientID: {client_id}")
                     else:
                         mqttserverlog.info(f"File Authentication Failed - Username: {username} - ClientID: {client_id}")
                 else:
-                    mqttserverlog.info(f"File Authentication Failed - No Entry for Username: {username} - ClientID: {client_id}")
+                    mqttserverlog.info(
+                        f"File Authentication Failed - No Entry for Username: {username} - ClientID: {client_id}")
 
         except Exception as e:
             mqttserverlog.exception(
@@ -456,12 +425,11 @@ class BumperMQTTServer_Plugin:
             authenticated = False
 
         # Check for allow anonymous
-        allow_anonymous = self.auth_config.get(
-            "allow-anonymous", True
-        )  
-        if allow_anonymous and not authenticated: # If anonymous auth is allowed and it isn't already authenticated
+        allow_anonymous = self.auth_config.get("allow-anonymous", True)
+        if allow_anonymous and not authenticated:  # If anonymous auth is allowed and it isn't already authenticated
             authenticated = True
-            self.context.logger.debug(f"Anonymous Authentication Success: config allows anonymous - Username: {username}")
+            self.context.logger.debug(
+                f"Anonymous Authentication Success: config allows anonymous - Username: {username}")
             mqttserverlog.info(f"Anonymous Authentication Success: config allows anonymous - Username: {username}")
 
         return authenticated
@@ -474,7 +442,7 @@ class BumperMQTTServer_Plugin:
                     self.context.logger.debug(f"Reading user database from {password_file}")
                     for l in f:
                         line = l.strip()
-                        if not line.startswith('#'):    # Allow comments in files
+                        if not line.startswith('#'):  # Allow comments in files
                             (username, pwd_hash) = line.split(sep=":", maxsplit=3)
                             if username:
                                 self._users[username] = pwd_hash
@@ -488,7 +456,7 @@ class BumperMQTTServer_Plugin:
             if client_id in self.proxyclients:
                 await self.proxyclients[client_id].subscribe(
                     [
-                        (topic, qos)                    
+                        (topic, qos)
                     ]
                 )
             else:
@@ -498,122 +466,83 @@ class BumperMQTTServer_Plugin:
         #pass
 
     async def on_broker_client_connected(self, client_id):
+        self._set_client_connected(client_id, True)
 
+    def _set_client_connected(self, client_id, connected: bool):
         didsplit = str(client_id).split("@")
 
         bot = bumper.bot_get(didsplit[0])
         if bot:
-            bumper.bot_set_mqtt(bot["did"], True)
+            bumper.bot_set_mqtt(bot["did"], connected)
             return
 
-        if len(didsplit) > 1:
-            clientresource = didsplit[1].split("/")[1]
-            client = bumper.client_get(clientresource)
-            if client:
-                bumper.client_set_mqtt(client["resource"], True)
-                return
+        clientresource = didsplit[1].split("/")[1]
+        client = bumper.client_get(clientresource)
+        if client:
+            bumper.client_set_mqtt(client["resource"], connected)
 
     async def on_broker_message_received(self, client_id, message):
-        await self.handle_helperbot_msg(client_id, message)
-        
-    async def handle_helperbot_msg(self, client_id, message):
-            if bumper.bumper_proxy_mode:
-                if client_id in self.proxyclients:
-                    msgdata = str(message.data.decode("utf-8"))
-                    if not str(message.topic).split("/")[3] == "proxyhelper":  # if from proxyhelper, don't send back to ecovacs...yet                
-                        if str(message.topic).split("/")[6] == "proxyhelper":                    
-                            ttopic = message.topic.split("/")
-                            ttopic[6] = self.proxyclients[client_id].eco_helper_names.pop(ttopic[10], "")
-                            ttopic_join = "/".join(ttopic)
-                            proxymodelog.info(f"MQTT Proxy Client - Bot Message Converted Topic From {message.topic} TO {ttopic_join} with message: {msgdata}")                    
-                        else:
-                            ttopic_join = message.topic
-                            proxymodelog.info(f"MQTT Proxy Client - Bot Message From {ttopic_join} with message: {msgdata}")                    
-                        
-                        try:
-                            # Send back to ecovacs
-                            proxymodelog.info(f"MQTT Proxy Client - Proxy Forward Message to Ecovacs - Topic: {ttopic_join} - Message: {msgdata.encode()}")
-                            await self.proxyclients[client_id].publish(
-                                ttopic_join, msgdata.encode(), message.qos
-                            )
-                        except Exception as e:
-                            proxymodelog.error(f"MQTT Proxy Client - Forwarding to Ecovacs Exception - {e}")
-
-
-            if str(message.topic).split("/")[6] == "helperbot":
-                # Response to command
-                helperbotlog.debug(
-                    "Received Response - Topic: {} - Message: {}".format(
-                        message.topic, str(message.data.decode("utf-8"))
-                    )
-                )
-                bumper.mqtt_helperbot.command_responses.append(
-                    {
-                        "time": time.time(),
-                        "topic": message.topic,
-                        "payload": str(message.data.decode("utf-8")),
-                    }
-                )
-            elif str(message.topic).split("/")[3] == "helperbot":
-                # Helperbot sending command
-                helperbotlog.debug(
-                    "Send Command - Topic: {} - Message: {}".format(
-                        message.topic, str(message.data.decode("utf-8"))
-                    )
-                )
-            elif str(message.topic).split("/")[1] == "atr":
-                # Broadcast message received on atr
-                if str(message.topic).split("/")[2] == "errors":
-                    boterrorlog.error(
-                        "Received Error - Topic: {} - Message: {}".format(
-                            message.topic, str(message.data.decode("utf-8"))
-                        )
-                    )
-                else:
-                    helperbotlog.debug(
-                        "Received Broadcast - Topic: {} - Message: {}".format(
-                            message.topic, str(message.data.decode("utf-8"))
-                        )
-                    )
-
-            else:
-                helperbotlog.debug(
-                    "Received Message - Topic: {} - Message: {}".format(
-                        message.topic, str(message.data.decode("utf-8"))
-                    )
-                )
-
-            # Cleanup "expired messages" > 60 seconds from time
-            for msg in bumper.mqtt_helperbot.command_responses:
-                expire_time = (
-                    datetime.fromtimestamp(msg["time"])
-                    + timedelta(seconds=bumper.mqtt_helperbot.expire_msg_seconds)
-                ).timestamp()
-                if time.time() > expire_time:
-                    helperbotlog.debug(
-                        "Pruning Message Due To Expiration - Message Topic: {}".format(
-                            msg["topic"]
-                        )
-                    )
-                    bumper.mqtt_helperbot.command_responses.remove(msg)
-
-
-    async def on_broker_client_disconnected(self, client_id):
+        topic = message.topic
+        topic_split = str(topic).split("/")
+        data_decoded = str(message.data.decode("utf-8"))
 
         if bumper.bumper_proxy_mode:
             if client_id in self.proxyclients:
+                if not str(message.topic).split("/")[
+                           3] == "proxyhelper":  # if from proxyhelper, don't send back to ecovacs...yet
+                    if str(message.topic).split("/")[6] == "proxyhelper":
+                        ttopic = message.topic.split("/")
+                        ttopic[6] = self.proxyclients[client_id].eco_helper_names.pop(ttopic[10], "")
+                        ttopic_join = "/".join(ttopic)
+                        proxymodelog.info(
+                            f"MQTT Proxy Client - Bot Message Converted Topic From {message.topic} TO {ttopic_join} with message: {msgdata}")
+                    else:
+                        ttopic_join = message.topic
+                        proxymodelog.info(f"MQTT Proxy Client - Bot Message From {ttopic_join} with message: {msgdata}")
+
+                    try:
+                        # Send back to ecovacs
+                        proxymodelog.info(
+                            f"MQTT Proxy Client - Proxy Forward Message to Ecovacs - Topic: {ttopic_join} - Message: {msgdata.encode()}")
+                        await self.proxyclients[client_id].publish(
+                            ttopic_join, msgdata.encode(), message.qos
+                        )
+                    except Exception as e:
+                        proxymodelog.error(f"MQTT Proxy Client - Forwarding to Ecovacs Exception - {e}")
+
+        if topic_split[6] == "helperbot":
+            # Response to command
+            helperbotlog.debug(f"Received Response - Topic: {topic} - Message: {data_decoded}")
+            bumper.mqtt_helperbot.command_responses.append(
+                {
+                    "time": time.time(),
+                    "topic": topic,
+                    "payload": data_decoded,
+                }
+            )
+        elif topic_split[3] == "helperbot":
+            # Helperbot sending command
+            helperbotlog.debug(f"Send Command - Topic: {topic} - Message: {data_decoded}")
+        elif topic_split[1] == "atr":
+            # Broadcast message received on atr
+            if topic_split[2] == "errors":
+                boterrorlog.error(f"Received Error - Topic: {topic} - Message: {data_decoded}")
+            else:
+                helperbotlog.debug(f"Received Broadcast - Topic: {topic} - Message: {data_decoded}")
+        else:
+            helperbotlog.debug(f"Received Message - Topic: {topic} - Message: {data_decoded}")
+
+        # Cleanup "expired messages" > 60 seconds from time
+        for msg in bumper.mqtt_helperbot.command_responses:
+            expire_time = (
+                    datetime.fromtimestamp(msg["time"]) + timedelta(seconds=MQTTHelperBot.wait_resp_timeout_seconds)
+            ).timestamp()
+            if time.time() > expire_time:
+                helperbotlog.debug(f"Pruning Message Due To Expiration - Message Topic: {msg['topic']}")
+                bumper.mqtt_helperbot.command_responses.remove(msg)
+
+    async def on_broker_client_disconnected(self, client_id):
+        if bumper.bumper_proxy_mode:
+            if client_id in self.proxyclients:
                 await self.proxyclients[client_id].disconnect()
-
-        didsplit = str(client_id).split("@")
-
-        bot = bumper.bot_get(didsplit[0])
-        if bot:
-            bumper.bot_set_mqtt(bot["did"], False)
-            return
-
-        if len(didsplit) > 1:
-            clientresource = didsplit[1].split("/")[1]
-            client = bumper.client_get(clientresource)
-            if client:
-                bumper.client_set_mqtt(client["resource"], False)
-                return
+        self._set_client_connected(client_id, False)
