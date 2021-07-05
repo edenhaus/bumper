@@ -3,34 +3,28 @@
 import asyncio
 import json
 import os
+import ssl
 import time
 from datetime import datetime, timedelta
-
 from typing import Dict
+from urllib.parse import urlparse, urlunparse
 
 import hbmqtt
-import websockets
-from hbmqtt.broker import Broker
-
-from hbmqtt.client import MQTTClient, ConnectException
-from hbmqtt.mqtt.constants import QOS_0, QOS_1, QOS_2
 import pkg_resources
-import time
+import websockets
+from hbmqtt.adapters import StreamReaderAdapter, StreamWriterAdapter, WebSocketsReader, WebSocketsWriter
+from hbmqtt.broker import Broker
+from hbmqtt.client import MQTTClient, ConnectException
+from hbmqtt.mqtt.connack import CONNECTION_ACCEPTED
+from hbmqtt.mqtt.constants import QOS_0
+from hbmqtt.mqtt.protocol.client_handler import ClientProtocolHandler
+from hbmqtt.mqtt.protocol.handler import ProtocolHandlerException
+from passlib.apps import custom_app_context as pwd_context
+from websockets.exceptions import InvalidHandshake
+from websockets.uri import InvalidURI
+
 import bumper
 from bumper.util import get_logger
-import json
-from datetime import datetime, timedelta
-from passlib.apps import custom_app_context as pwd_context
-import ssl
-import tempfile
-
-from urllib.parse import urlparse, urlunparse
-from hbmqtt.mqtt.protocol.client_handler import ClientProtocolHandler
-from hbmqtt.adapters import StreamReaderAdapter, StreamWriterAdapter, WebSocketsReader, WebSocketsWriter
-from websockets.uri import InvalidURI
-from websockets.exceptions import InvalidHandshake
-from hbmqtt.mqtt.protocol.handler import ProtocolHandlerException
-from hbmqtt.mqtt.connack import CONNECTION_ACCEPTED
 
 mqttserverlog = get_logger("mqttserver")
 helperbotlog = get_logger("helperbot")
@@ -203,11 +197,11 @@ class MQTTServer:
         except Exception as e:
             mqttserverlog.exception("{}".format(e))
 
-class BumperProxyModeMQTTClient(MQTTClient):
 
+class BumperProxyModeMQTTClient(MQTTClient):
     eco_helper_names: Dict[str, str] = {}
 
-    async def _connect_coro(self): #Override default to ignore ssl verification
+    async def _connect_coro(self):  # Override default to ignore ssl verification
         kwargs = dict()
 
         # Decode URI attributes
@@ -225,10 +219,10 @@ class BumperProxyModeMQTTClient(MQTTClient):
         if scheme in ('ws', 'wss'):
             # Rewrite URI to conform to https://tools.ietf.org/html/rfc6455#section-3
             uri = (scheme, self.session.remote_address + ":" + str(self.session.remote_port), uri_attributes[2],
-                uri_attributes[3], uri_attributes[4], uri_attributes[5])
+                   uri_attributes[3], uri_attributes[4], uri_attributes[5])
             self.session.broker_uri = urlunparse(uri)
         # Init protocol handler
-        #if not self._handler:
+        # if not self._handler:
         self._handler = ClientProtocolHandler(self.plugins_manager, loop=self._loop)
 
         if secure:
@@ -242,7 +236,7 @@ class BumperProxyModeMQTTClient(MQTTClient):
             if 'check_hostname' in self.config and isinstance(self.config['check_hostname'], bool):
                 sc.check_hostname = self.config['check_hostname']
 
-            sc.verify_mode = ssl.CERT_NONE #Ignore verify of cert
+            sc.verify_mode = ssl.CERT_NONE  # Ignore verify of cert
             kwargs['ssl'] = sc
 
         try:
@@ -301,7 +295,8 @@ class BumperProxyModeMQTTClient(MQTTClient):
                 message = await self.deliver_message()
                 msgdata = str(message.data.decode("utf-8"))
 
-                proxymodelog.info(f"MQTT Proxy Client - Message Received From Ecovacs - Topic: {message.topic} - Message: {msgdata}")
+                proxymodelog.info(
+                    f"MQTT Proxy Client - Message Received From Ecovacs - Topic: {message.topic} - Message: {msgdata}")
                 topic = message.topic
                 ttopic = topic.split("/")
                 if ttopic[1] == "p2p":
@@ -319,8 +314,10 @@ class BumperProxyModeMQTTClient(MQTTClient):
         except Exception as e:
             proxymodelog.error(f"MQTT Proxy Client - get_msg Exception - {e}")
 
+
 class BumperMQTTServer_Plugin:
     proxyclients: Dict[str, BumperProxyModeMQTTClient] = {}
+
     def __init__(self, context):
         self.context = context
         try:
@@ -334,8 +331,6 @@ class BumperMQTTServer_Plugin:
             )
         except Exception as e:
             mqttserverlog.exception("{}".format(e))
-
-
 
     async def authenticate(self, *args, **kwargs):
         authenticated = False
@@ -364,15 +359,17 @@ class BumperMQTTServer_Plugin:
                     authenticated = True
 
                     if authenticated and bumper.bumper_proxy_mode:
-                        mqtt_server = bumper.config_proxyMode_getServerIP("mqtt_server","")
+                        mqtt_server = bumper.config_proxyMode_getServerIP("mqtt_server", "")
                         if mqtt_server:
                             proxymodelog.info(f"MQTT Proxy Mode - Using server {mqtt_server}")
                         else:
-                            proxymodelog.error(f"MQTT Proxy Mode - No server found! Load defaults or set mqtt_server in config_proxymode table!")
+                            proxymodelog.error(
+                                f"MQTT Proxy Mode - No server found! Load defaults or set mqtt_server in config_proxymode table!")
                             proxymodelog.exception(f"MQTT Proxy Mode - Exiting due to no MQTT Server configured!")
                             exit(1)
 
-                        proxymodelog.info(f"MQTT Proxy Mode - Proxy Bot to MQTT - Client_id: {client_id} - Username: {username}")
+                        proxymodelog.info(
+                            f"MQTT Proxy Mode - Proxy Bot to MQTT - Client_id: {client_id} - Username: {username}")
 
                         self.proxyclients[client_id] = BumperProxyModeMQTTClient(
                             client_id=client_id, config={"check_hostname": False}
@@ -452,7 +449,7 @@ class BumperMQTTServer_Plugin:
                 self.context.logger.warning(f"Password file {password_file} not found")
 
     async def on_broker_client_subscribed(self, client_id, topic, qos):
-        if bumper.bumper_proxy_mode: #if proxy mode, also subscribe on ecovacs server
+        if bumper.bumper_proxy_mode:  # if proxy mode, also subscribe on ecovacs server
             if client_id in self.proxyclients:
                 await self.proxyclients[client_id].subscribe(
                     [
@@ -460,10 +457,11 @@ class BumperMQTTServer_Plugin:
                     ]
                 )
             else:
-                proxymodelog.info(f"MQTT Proxy Mode - New MQTT Topic Subscription - Client: {client_id} - Topic: {topic}")
+                proxymodelog.info(
+                    f"MQTT Proxy Mode - New MQTT Topic Subscription - Client: {client_id} - Topic: {topic}")
 
-        #return
-        #pass
+        # return
+        # pass
 
     async def on_broker_client_connected(self, client_id):
         self._set_client_connected(client_id, True)
@@ -488,24 +486,23 @@ class BumperMQTTServer_Plugin:
 
         if bumper.bumper_proxy_mode:
             if client_id in self.proxyclients:
-                if not str(message.topic).split("/")[
-                           3] == "proxyhelper":  # if from proxyhelper, don't send back to ecovacs...yet
-                    if str(message.topic).split("/")[6] == "proxyhelper":
+                if not topic_split[3] == "proxyhelper": # if from proxyhelper, don't send back to ecovacs...yet
+                    if topic_split[6] == "proxyhelper":
                         ttopic = message.topic.split("/")
                         ttopic[6] = self.proxyclients[client_id].eco_helper_names.pop(ttopic[10], "")
                         ttopic_join = "/".join(ttopic)
                         proxymodelog.info(
-                            f"MQTT Proxy Client - Bot Message Converted Topic From {message.topic} TO {ttopic_join} with message: {msgdata}")
+                            f"MQTT Proxy Client - Bot Message Converted Topic From {message.topic} TO {ttopic_join} with message: {data_decoded}")
                     else:
                         ttopic_join = message.topic
-                        proxymodelog.info(f"MQTT Proxy Client - Bot Message From {ttopic_join} with message: {msgdata}")
+                        proxymodelog.info(f"MQTT Proxy Client - Bot Message From {ttopic_join} with message: {data_decoded}")
 
                     try:
                         # Send back to ecovacs
                         proxymodelog.info(
-                            f"MQTT Proxy Client - Proxy Forward Message to Ecovacs - Topic: {ttopic_join} - Message: {msgdata.encode()}")
+                            f"MQTT Proxy Client - Proxy Forward Message to Ecovacs - Topic: {ttopic_join} - Message: {data_decoded.encode()}")
                         await self.proxyclients[client_id].publish(
-                            ttopic_join, msgdata.encode(), message.qos
+                            ttopic_join, data_decoded.encode(), message.qos
                         )
                     except Exception as e:
                         proxymodelog.error(f"MQTT Proxy Client - Forwarding to Ecovacs Exception - {e}")
