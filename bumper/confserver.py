@@ -393,7 +393,7 @@ class ConfServer:
                 to_log["response"] = {
                     "status": f"{response.status}",
                 }
-                if not "application/octet-stream" in response.content_type:
+                if "application/octet-stream" not in response.content_type and response.body:
                     to_log["response"]["body"] = f"{json.loads(response.body)}"
 
                 confserverlog.debug(json.dumps(to_log))
