@@ -77,8 +77,8 @@ logging.getLogger("asyncio").setLevel(logging.CRITICAL + 1)  # Ignore this logge
 proxymodelog =  get_logger("proxymode")
 
 # iptables -A PREROUTING -t nat -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 8883
-mqtt_listen_port = 8883
-conf1_listen_port = 443
+mqtt_listen_port = 443
+conf1_listen_port = 8443
 conf2_listen_port = 8007
 xmpp_listen_port = 5223
 
