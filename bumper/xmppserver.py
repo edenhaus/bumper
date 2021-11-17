@@ -7,6 +7,8 @@ import ssl
 import uuid
 import xml.etree.ElementTree as ET
 
+from defusedxml import ElementTree
+
 import bumper
 from bumper import get_logger
 
@@ -693,7 +695,7 @@ class XMPPAsyncClient:
             )  # Add artificial root
 
         try:
-            root = ET.fromstring(newdata)
+            root = ElementTree.fromstring(newdata)
             for item in root.iter():
                 if item.tag != "root":
                     if item.tag == "iq":

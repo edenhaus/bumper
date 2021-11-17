@@ -3,9 +3,9 @@ import json
 import logging
 import random
 import string
-import xml.etree.ElementTree as ET
 
 from aiohttp import web
+from defusedxml import ElementTree
 
 import bumper
 from bumper import plugins
@@ -67,7 +67,7 @@ class portal_api_lg(plugins.ConfServerApp):
                     logging.debug(f"Send Bot - {json_body}")
                     logging.debug(f"Bot Response - {body}")
                     logs = []
-                    logsroot = ET.fromstring(retcmd["resp"])
+                    logsroot = ElementTree.fromstring(retcmd["resp"])
                     if logsroot.attrib["ret"] == "ok":
                         cleanlogs = logsroot.getchildren()
                         for log in cleanlogs:
