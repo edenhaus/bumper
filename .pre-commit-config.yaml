@@ -86,8 +86,4 @@ repos:
         types: [python]
         require_serial: true
         <<: *python-files
-      - id: verifyNoGetLogger
-        name: Verify no getLogger usages
-        entry: scripts/check_getLogger.sh
-        language: script
-        require_serial: true
+
