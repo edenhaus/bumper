@@ -2,7 +2,6 @@
 
 import asyncio
 import base64
-import logging
 import re
 import ssl
 import uuid
@@ -241,7 +240,7 @@ class XMPPAsyncClient:
                     and client.state == client.READY
                 ):
                     ctl_to = xml.get("to")
-                    if not "from" in xml.attrib:
+                    if "from" not in xml.attrib:
                         xml.attrib["from"] = f"{self.bumper_jid}"
                     rxmlstring = ET.tostring(xml).decode("utf-8")
                     # clean up string to remove namespaces added by ET
@@ -271,7 +270,7 @@ class XMPPAsyncClient:
             else:
                 pingto = xml.get("to")
                 pingfrom = self.bumper_jid
-                if not "from" in xml.attrib:
+                if "from" not in xml.attrib:
                     xml.attrib["from"] = f"{pingfrom}"
                 pingstring = ET.tostring(xml).decode("utf-8")
                 # clean up string to remove namespaces added by ET
@@ -303,7 +302,7 @@ class XMPPAsyncClient:
     def _handle_result(self, xml, data):
         try:
             ctl_to = xml.get("to")
-            if not "from" in xml.attrib:
+            if "from" not in xml.attrib:
                 xml.attrib["from"] = f"{self.bumper_jid}"
             if "errno" in data:
                 xmppserverlog.error(f"Error from bot - {data}")
@@ -380,7 +379,7 @@ class XMPPAsyncClient:
                         client.bumper_jid != self.bumper_jid
                         and client.state == client.READY
                     ):
-                        if not "@" in ctl_to:  # No user@, send to all clients?
+                        if "@" not in ctl_to:  # No user@, send to all clients?
                             # TODO: Revisit later, this may be wrong
                             client.send(rxmlstring)
 
@@ -401,7 +400,7 @@ class XMPPAsyncClient:
         try:
 
             if self.state == self.CONNECT:
-                if xml == None:
+                if xml is None:
                     # Client first connecting, send our features
                     if data.decode("utf-8").find("jabber:client") > -1:
                         sc = data.decode("utf-8").find("to=")
@@ -417,7 +416,7 @@ class XMPPAsyncClient:
                         )
 
                         # Send STARTTLS to client with auth mechanisms
-                        if self.TLSUpgraded == False:
+                        if self.TLSUpgraded is False:
                             # With STARTTLS #https://xmpp.org/rfcs/rfc3920.html
                             self.send(
                                 '<stream:features><starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"><required/></starttls><mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><mechanism>PLAIN</mechanism></mechanisms></stream:features>'
@@ -441,7 +440,7 @@ class XMPPAsyncClient:
                         xmppserverlog.error(f"Couldn't handle: {xml}")
 
             elif self.state == self.INIT:
-                if xml == None:
+                if xml is None:
                     # Client getting session after authentication
                     if data.decode("utf-8").find("jabber:client") > -1:
                         # ack jabbr:client
@@ -472,7 +471,7 @@ class XMPPAsyncClient:
 
     async def _handle_starttls(self, data):
         try:
-            if self.TLSUpgraded == False:
+            if self.TLSUpgraded is False:
                 self.TLSUpgraded = True  # Set TLSUpgraded true to prevent further attempts to upgrade connection
                 xmppserverlog.debug(
                     "Upgrading connection with STARTTLS for {}:{}".format(
@@ -534,7 +533,7 @@ class XMPPAsyncClient:
                 auth = False
                 if bumper.check_authcode(self.uid, authcode):
                     auth = True
-                elif bumper.use_auth == False:
+                elif bumper.use_auth is False:
                     auth = True
 
                 if auth:
@@ -766,7 +765,7 @@ class XMPPAsyncClient:
 
             elif "not well-formed (invalid token)" in e.msg:
                 # If a lone </stream:stream> - client is signalling end of session/disconnect
-                if not "</stream:stream>" in newdata:
+                if "</stream:stream>" not in newdata:
                     xmppserverlog.error(f"xml parse error - {newdata} - {e}")
                 else:
                     self.send("</stream:stream>")  # Close stream
@@ -777,7 +776,7 @@ class XMPPAsyncClient:
                         xmppserverlog.debug(f"Handling connect data - {newdata}")
                         self._handle_connect(newdata.encode("utf-8"))
                 else:
-                    if not "</stream:stream>" in newdata:
+                    if "</stream:stream>" not in newdata:
                         xmppserverlog.error(f"xml parse error - {newdata} - {e}")
                     else:
                         self.send("</stream:stream>")  # Close stream

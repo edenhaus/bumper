@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 
 import asyncio
+import json
 import logging
 import os
 import ssl
+import uuid
+from datetime import datetime
 
 import aiohttp_jinja2
 import jinja2
 from aiohttp import web
 
-from bumper import plugins
-from bumper.models import *
+import bumper
+from .models import EcoVacsHome_Login, EcoVacs_Login, API_ERRORS, RETURN_API_SUCCESS
 
 from .util import get_logger
 
@@ -262,7 +265,7 @@ class ConfServer:
                 to_log["response"] = {
                     "status": f"{response.status}",
                 }
-                if not "application/octet-stream" in response.content_type:
+                if "application/octet-stream" not in response.content_type:
                     to_log["response"]["body"] = f"{json.loads(response.body)}"
 
                 confserverlog.debug(json.dumps(to_log))
@@ -627,7 +630,7 @@ class ConfServer:
                             )
                         if token:
                             authcode = ""
-                            if not "authcode" in token:
+                            if "authcode" not in token:
                                 authcode = self.generate_authcode(
                                     user,
                                     request.match_info.get("country", "us"),

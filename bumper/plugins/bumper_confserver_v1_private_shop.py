@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class v1_private_shop(plugins.ConfServerApp):
@@ -20,7 +18,7 @@ class v1_private_shop(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/shop/getCnWapShopConfig",
-                self.handle_getCnWapShopConfig,
+                self._handle_getCnWapShopConfig,
                 name="v1_shop_getCnWapShopConfig",
             ),
         ]
@@ -29,7 +27,7 @@ class v1_private_shop(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_getCnWapShopConfig(self, request):  # EcoVacs Home
+    async def _handle_getCnWapShopConfig(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,

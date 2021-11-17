@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class v1_private_user(plugins.ConfServerApp):
@@ -46,13 +44,13 @@ class v1_private_user(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/user/checkAgreement",
-                self.handle_checkAgreement,
+                self._handle_checkAgreement,
                 name="v1_user_checkAgreement",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/user/checkAgreementBatch",
-                self.handle_checkAgreement,
+                self._handle_checkAgreement,
                 name="v1_user_checkAgreementBatch",
             ),
             web.route(
@@ -64,25 +62,25 @@ class v1_private_user(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/user/getUserMenuInfo",
-                self.handle_getUserMenuInfo,
+                self._handle_getUserMenuInfo,
                 name="v1_user_getUserMenuInfo",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/user/changeArea",
-                self.handle_changeArea,
+                self._handle_changeArea,
                 name="v1_user_changeArea",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/user/queryChangeArea",
-                self.handle_changeArea,
+                self._handle_changeArea,
                 name="v1_user_queryChangeArea",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/user/acceptAgreementBatch",
-                self.handle_acceptAgreementBatch,
+                self._handle_acceptAgreementBatch,
                 name="v1_user_acceptAgreementBatch",
             ),
             # Direct register from app:
@@ -95,7 +93,7 @@ class v1_private_user(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_checkAgreement(self, request):
+    async def _handle_checkAgreement(self, request):
         try:
             apptype = request.match_info.get("apptype", "")
             if "global_" in apptype:
@@ -134,9 +132,8 @@ class v1_private_user(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getUserMenuInfo(self, request):
+    async def _handle_getUserMenuInfo(self, request):
         try:
-            apptype = request.match_info.get("apptype", "")
             body = {
                 "code": "0000",
                 "data": [
@@ -203,7 +200,7 @@ class v1_private_user(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_changeArea(self, request):
+    async def _handle_changeArea(self, request):
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -218,7 +215,7 @@ class v1_private_user(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_acceptAgreementBatch(self, request):
+    async def _handle_acceptAgreementBatch(self, request):
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,

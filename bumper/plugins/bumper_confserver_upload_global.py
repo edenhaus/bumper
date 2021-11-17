@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
 import logging
 import os
-from datetime import datetime, timedelta
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class upload_global(plugins.ConfServerApp):
@@ -21,7 +18,7 @@ class upload_global(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/global/{year}/{month}/{day}/{fileid}",
-                self.handle_upload_global_file,
+                self._handle_upload_global_file,
                 name="upload_global_getFile",
             ),
         ]
@@ -30,10 +27,8 @@ class upload_global(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_upload_global_file(self, request):
+    async def _handle_upload_global_file(self, request):
         try:
-            fileID = request.match_info.get("id", "")
-
             return web.FileResponse(
                 os.path.join(
                     bumper.bumper_dir, "bumper", "web", "images", "robotvac_image.jpg"

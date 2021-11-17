@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import json
 import logging
 
 from aiohttp import web
 
+import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class portal_api_appsvr(plugins.ConfServerApp):
@@ -17,19 +18,19 @@ class portal_api_appsvr(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/appsvr/app.do",
-                self.handle_appsvr_app,
+                self._handle_appsvr_app,
                 name="portal_api_appsvr_app",
             ),
             web.route(
                 "*",
                 "/appsvr/service/list",
-                self.handle_appsvr_service_list,
+                self._handle_appsvr_service_list,
                 name="portal_api_appsvr_service_list",
             ),
             web.route(
                 "*",
                 "/appsvr/oauth_callback",
-                self.handle_appsvr_oauth_callback,
+                self._handle_appsvr_oauth_callback,
                 name="portal_api_appsvr_oauth_callback",
             ),
         ]
@@ -38,7 +39,7 @@ class portal_api_appsvr(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_appsvr_app(self, request):
+    async def _handle_appsvr_app(self, request):
         if not request.method == "GET":  # Skip GET for now
             try:
 
@@ -58,9 +59,8 @@ class portal_api_appsvr(plugins.ConfServerApp):
                     for bot in bots:
                         if bot["class"] != "":
                             b = bumper.bot_toEcoVacsHome_JSON(bot)
-                            if (
-                                not b is None
-                            ):  # Happens if the bot isn't on the EcoVacs Home list
+                            if b is not None:
+                                # Happens if the bot isn't on the EcoVacs Home list
                                 botlist.append(json.loads(b))
 
                     body = {
@@ -170,7 +170,7 @@ class portal_api_appsvr(plugins.ConfServerApp):
         body = {"result": "fail", "todo": "result"}
         return web.json_response(body)
 
-    async def handle_appsvr_service_list(self, request):
+    async def _handle_appsvr_service_list(self, request):
         try:
             # original urls comment out as they are sub sub domain, which the current certificate is not valid
             # using url, where the certs is valid
@@ -201,7 +201,7 @@ class portal_api_appsvr(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_appsvr_oauth_callback(self, request):
+    async def _handle_appsvr_oauth_callback(self, request):
         try:
             token = bumper.token_by_authcode(request.query["code"])
             oauth = bumper.user_add_oauth(token["userid"])

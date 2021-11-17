@@ -8,7 +8,6 @@ from typing import MutableMapping
 import hbmqtt
 import pkg_resources
 from cachetools import TTLCache
-from hbmqtt.broker import Broker
 from hbmqtt.client import MQTTClient
 from hbmqtt.mqtt.constants import QOS_0
 from passlib.apps import custom_app_context as pwd_context
@@ -98,7 +97,7 @@ class MQTTHelperBot:
         }
 
     async def send_command(self, cmdjson, requestid):
-        if not self.Client._handler.writer is None:
+        if self.Client._handler.writer is not None:
             try:
                 topic = "iot/p2p/{}/helperbot/bumper/helperbot/{}/{}/{}/q/{}/{}".format(
                     cmdjson["cmdName"],
@@ -318,12 +317,12 @@ class BumperMQTTServer_Plugin:
         password_file = self.auth_config.get("password-file", None)
         if password_file:
             try:
-                with open(password_file) as f:
+                with open(password_file) as file:
                     self.context.logger.debug(
                         f"Reading user database from {password_file}"
                     )
-                    for l in f:
-                        line = l.strip()
+                    for line in file:
+                        line = line.strip()
                         if not line.startswith("#"):  # Allow comments in files
                             (username, pwd_hash) = line.split(sep=":", maxsplit=3)
                             if username:

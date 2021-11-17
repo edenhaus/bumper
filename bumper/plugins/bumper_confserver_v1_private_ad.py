@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class v1_private_ad(plugins.ConfServerApp):
@@ -20,13 +18,13 @@ class v1_private_ad(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/ad/getAdByPositionType",
-                self.handle_getAdByPositionType,
+                self._handle_getAdByPositionType,
                 name="v1_ad_getAdByPositionType",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/ad/getBootScreen",
-                self.handle_getBootScreen,
+                self._handle_getBootScreen,
                 name="v1_ad_getBootScreen",
             ),
         ]
@@ -35,7 +33,7 @@ class v1_private_ad(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_getAdByPositionType(self, request):  # EcoVacs Home
+    async def _handle_getAdByPositionType(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -50,7 +48,7 @@ class v1_private_ad(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getBootScreen(self, request):  # EcoVacs Home
+    async def _handle_getBootScreen(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,

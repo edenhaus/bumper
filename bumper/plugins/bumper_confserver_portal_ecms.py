@@ -3,8 +3,8 @@ import logging
 
 from aiohttp import web
 
+import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class portal_api_ecms(plugins.ConfServerApp):
@@ -17,7 +17,7 @@ class portal_api_ecms(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/ecms/app/ad/res",
-                self.handle_ad_res,
+                self._handle_ad_res,
                 name="portal_api_ecms_ad_res",
             ),
         ]
@@ -26,7 +26,7 @@ class portal_api_ecms(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_ad_res(self, request):
+    async def _handle_ad_res(self, request):
         try:
             body = {"code": 0, "data": [], "message": "success", "success": True}
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import asyncio
 import logging
 from datetime import datetime, timedelta
 
@@ -7,7 +6,6 @@ from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class v1_private_campaign(plugins.ConfServerApp):
@@ -20,7 +18,7 @@ class v1_private_campaign(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/campaign/homePageAlert",
-                self.handle_homePageAlert,
+                self._handle_homePageAlert,
                 name="v1_campaign_homePageAlert",
             ),
         ]
@@ -29,7 +27,7 @@ class v1_private_campaign(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_homePageAlert(self, request):
+    async def _handle_homePageAlert(self, request):
         try:
             nextAlert = self.get_milli_time(
                 (datetime.now() + timedelta(hours=12)).timestamp()

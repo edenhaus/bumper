@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
+"""Bumper module."""
 import asyncio
 import importlib
+import logging
+import os
 import pkgutil
 import socket
 import sys
 from typing import Optional
 
 from bumper.confserver import ConfServer
-from bumper.db import *
-from bumper.models import *
+from bumper.db import revoke_expired_oauths, revoke_expired_tokens
 from bumper.mqttserver import MQTTHelperBot, MQTTServer
 from bumper.util import get_logger, log_to_stdout
 from bumper.xmppserver import XMPPServer
@@ -83,7 +85,7 @@ xmpp_listen_port = 5223
 async def start():
     try:
         loop = asyncio.get_event_loop()
-    except:
+    except Exception:  # pylint: disable=broad-except
         loop = asyncio.new_event_loop()
 
     if bumper_debug:

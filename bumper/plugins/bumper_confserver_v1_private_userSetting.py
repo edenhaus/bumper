@@ -19,7 +19,7 @@ class v1_private_userSetting(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/userSetting/getSuggestionSetting",
-                self.handle_getSuggestionSetting,
+                self._handle_getSuggestionSetting,
                 name="v1_userSetting_getSuggestionSetting",
             ),
         ]
@@ -28,7 +28,7 @@ class v1_private_userSetting(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_getSuggestionSetting(self, request):
+    async def _handle_getSuggestionSetting(self, request):
         try:
 
             body = {

@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-import asyncio
-import logging
-from datetime import datetime, timedelta
-
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class v2_private_user(plugins.ConfServerApp):

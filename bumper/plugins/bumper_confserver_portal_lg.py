@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import logging
 import random
 import string
@@ -6,8 +7,8 @@ import xml.etree.ElementTree as ET
 
 from aiohttp import web
 
+import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class portal_api_lg(plugins.ConfServerApp):
@@ -17,14 +18,14 @@ class portal_api_lg(plugins.ConfServerApp):
         self.sub_api = "portal_api"
 
         self.routes = [
-            web.route("*", "/lg/log.do", self.handle_lg_log, name="portal_api_lg_log"),
+            web.route("*", "/lg/log.do", self._handle_lg_log, name="portal_api_lg_log"),
         ]
 
         self.get_milli_time = (
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_lg_log(self, request):  # EcoVacs Home
+    async def _handle_lg_log(self, request):  # EcoVacs Home
         randomid = "".join(random.sample(string.ascii_letters, 6))
 
         try:
@@ -34,23 +35,23 @@ class portal_api_lg(plugins.ConfServerApp):
 
             botdetails = bumper.bot_get(did)
             if botdetails:
-                if not "cmdName" in json_body:
+                if "cmdName" not in json_body:
                     if "td" in json_body:
                         json_body["cmdName"] = json_body["td"]
 
-                if not "toId" in json_body:
+                if "toId" not in json_body:
                     json_body["toId"] = did
 
-                if not "toType" in json_body:
+                if "toType" not in json_body:
                     json_body["toType"] = botdetails["class"]
 
-                if not "toRes" in json_body:
+                if "toRes" not in json_body:
                     json_body["toRes"] = botdetails["resource"]
 
-                if not "payloadType" in json_body:
+                if "payloadType" not in json_body:
                     json_body["payloadType"] = "x"
 
-                if not "payload" in json_body:
+                if "payload" not in json_body:
                     # json_body["payload"] = ""
                     if json_body["td"] == "GetCleanLogs":
                         json_body["td"] = "q"
@@ -69,12 +70,12 @@ class portal_api_lg(plugins.ConfServerApp):
                     logsroot = ET.fromstring(retcmd["resp"])
                     if logsroot.attrib["ret"] == "ok":
                         cleanlogs = logsroot.getchildren()
-                        for l in cleanlogs:
+                        for log in cleanlogs:
                             cleanlog = {
-                                "ts": l.attrib["s"],
-                                "area": l.attrib["a"],
-                                "last": l.attrib["l"],
-                                "cleanType": l.attrib["t"],
+                                "ts": log.attrib["s"],
+                                "area": log.attrib["a"],
+                                "last": log.attrib["l"],
+                                "cleanType": log.attrib["t"],
                                 # imageUrl allows for providing images of cleanings, something to look into later
                                 # "imageUrl": "https://localhost:8007",
                             }

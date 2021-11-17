@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-import asyncio
 import logging
-from datetime import datetime, timedelta
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class portal_api_neng(plugins.ConfServerApp):
@@ -20,19 +17,19 @@ class portal_api_neng(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/neng/message/hasUnreadMsg",
-                self.handle_neng_hasUnreadMessage,
+                self._handle_neng_hasUnreadMessage,
                 name="portal_api_neng_hasUnreadMessage",
             ),
             web.route(
                 "*",
                 "/neng/message/getShareMsgs",
-                self.handle_neng_getShareMsgs,
+                self._handle_neng_getShareMsgs,
                 name="portal_api_neng_getShareMsgs",
             ),
             web.route(
                 "*",
                 "/neng/message/getlist",
-                self.handle_neng_getlist,
+                self._handle_neng_getlist,
                 name="portal_api_neng_getlist",
             ),
         ]
@@ -41,7 +38,7 @@ class portal_api_neng(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_neng_hasUnreadMessage(self, request):  # EcoVacs Home
+    async def _handle_neng_hasUnreadMessage(self, request):  # EcoVacs Home
         try:
             body = {"code": 0, "data": {"hasUnRead": True}}
 
@@ -50,7 +47,7 @@ class portal_api_neng(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_neng_getShareMsgs(self, request):  # EcoVacs Home
+    async def _handle_neng_getShareMsgs(self, request):  # EcoVacs Home
         try:
             body = {"code": 0, "data": {"hasNext": False, "msgs": []}}
 
@@ -82,7 +79,7 @@ class portal_api_neng(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_neng_getlist(self, request):  # EcoVacs Home
+    async def _handle_neng_getlist(self, request):  # EcoVacs Home
         try:
             body = {"code": 0, "data": {"hasNext": False, "msgs": []}}
 

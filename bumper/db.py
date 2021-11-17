@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import logging
 import os
 from datetime import datetime, timedelta
 
@@ -82,7 +81,7 @@ def user_add_device(userid, devid):
         User = Query()
         user = users.get(User.userid == userid)
         userdevices = list(user["devices"])
-        if not devid in userdevices:
+        if devid not in userdevices:
             userdevices.append(devid)
 
         users.upsert({"devices": userdevices}, User.userid == userid)
@@ -108,7 +107,7 @@ def user_add_bot(userid, did):
         User = Query()
         user = users.get(User.userid == userid)
         userbots = list(user["bots"])
-        if not did in userbots:
+        if did not in userbots:
             userbots.append(did)
 
         users.upsert({"bots": userbots}, User.userid == userid)
@@ -263,7 +262,7 @@ def token_by_authcode(authcode):
 def get_disconnected_xmpp_clients():
     clients = db_get().table("clients")
     Client = Query()
-    return clients.search(Client.xmpp_connection == False)
+    return clients.search(Client.xmpp_connection is False)
 
 
 def check_authcode(uid, authcode):

@@ -13,6 +13,8 @@ log_to_stdout = os.environ.get("LOG_TO_STDOUT")
 
 
 def get_logger(name: str, rotate: RotatingFileHandler = None) -> logging.Logger:
+    """Get configured logger."""
+
     found_logger = __loggers.get(name)
     if found_logger:
         return found_logger

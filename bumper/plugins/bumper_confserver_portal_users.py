@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
+import json
 import logging
-from datetime import datetime, timedelta
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class portal_api_users(plugins.ConfServerApp):
@@ -20,7 +18,7 @@ class portal_api_users(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/users/user.do",
-                self.handle_usersapi,
+                self._handle_usersapi,
                 name="portal_api_users_user",
             ),
         ]
@@ -29,7 +27,7 @@ class portal_api_users(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_usersapi(self, request):
+    async def _handle_usersapi(self, request):
         if not request.method == "GET":  # Skip GET for now
             try:
 

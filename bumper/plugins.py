@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-import asyncio
-
-from aiohttp import web
 
 
 class ConfServerApp:
+    """Class to be implemented by plugins."""
+
     name = None
     plugin_type = None
     path_prefix = None

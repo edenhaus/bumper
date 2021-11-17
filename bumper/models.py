@@ -98,6 +98,7 @@ class OAuth:
 
     @classmethod
     def create_new(cls, userId: str):
+        """Create new oauth."""
         oauth = OAuth()
         oauth.userId = userId
         oauth.access_token = uuid.uuid4().hex
@@ -108,9 +109,11 @@ class OAuth:
         return oauth
 
     def toDB(self):
+        """Get dict for database."""
         return self.__dict__
 
     def toResponse(self):
+        """Get dict for web response."""
         data = self.__dict__
         data[
             "expire_at"

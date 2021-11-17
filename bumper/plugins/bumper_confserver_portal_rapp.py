@@ -3,8 +3,8 @@ import logging
 
 from aiohttp import web
 
+import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class api_rapp(plugins.ConfServerApp):
@@ -15,7 +15,10 @@ class api_rapp(plugins.ConfServerApp):
 
         self.routes = [
             web.route(
-                "*", "/rapp/sds/user/data/map/get", self.handle_map_get, name="api_rapp"
+                "*",
+                "/rapp/sds/user/data/map/get",
+                self._handle_map_get,
+                name="api_rapp",
             ),
         ]
 
@@ -23,7 +26,7 @@ class api_rapp(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_map_get(self, request):
+    async def _handle_map_get(self, request):
         try:
             body = {
                 "code": 0,

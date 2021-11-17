@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+import json
 import logging
 import os
 
 from aiohttp import web
 
+import bumper
 from bumper import plugins
-from bumper.models import *
+from bumper.models import EcoVacsHomeProducts
 
 
 class portal_api_pim(plugins.ConfServerApp):
@@ -18,37 +20,37 @@ class portal_api_pim(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/pim/product/getProductIotMap",
-                self.handle_getProductIotMap,
+                self._handle_getProductIotMap,
                 name="portal_api_pim_getProductIotMap",
             ),
             web.route(
                 "*",
                 "/pim/file/get/{id}",
-                self.handle_pimFile,
+                self._handle_pimFile,
                 name="portal_api_pim_file",
             ),
             web.route(
                 "*",
                 "/pim/product/getConfignetAll",
-                self.handle_getConfignetAll,
+                self._handle_getConfignetAll,
                 name="portal_api_pim_getConfignetAll",
             ),
             web.route(
                 "*",
                 "/pim/product/getConfigGroups",
-                self.handle_getConfigGroups,
+                self._handle_getConfigGroups,
                 name="portal_api_pim_getConfigGroups",
             ),
             web.route(
                 "*",
                 "/pim/dictionary/getErrDetail",
-                self.handle_getErrDetail,
+                self._handle_getErrDetail,
                 name="portal_api_pim_getErrDetail",
             ),
             web.route(
                 "*",
                 "/pim/product/software/config/batch",
-                self.handle_product_config_batch,
+                self._handle_product_config_batch,
                 name="portal_api_pim_product_config_batch",
             ),
         ]
@@ -57,7 +59,7 @@ class portal_api_pim(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_getProductIotMap(self, request):
+    async def _handle_getProductIotMap(self, request):
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -68,10 +70,8 @@ class portal_api_pim(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_pimFile(self, request):
+    async def _handle_pimFile(self, request):
         try:
-            fileID = request.match_info.get("id", "")
-
             return web.FileResponse(
                 os.path.join(
                     bumper.bumper_dir, "bumper", "web", "images", "robotvac_image.jpg"
@@ -81,7 +81,7 @@ class portal_api_pim(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getConfignetAll(self, request):
+    async def _handle_getConfignetAll(self, request):
         try:
             body = confignetAllResponse
             return web.json_response(body)
@@ -89,7 +89,7 @@ class portal_api_pim(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getConfigGroups(self, request):
+    async def _handle_getConfigGroups(self, request):
         try:
             body = configGroupsResponse
             return web.json_response(body)
@@ -97,7 +97,7 @@ class portal_api_pim(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getErrDetail(self, request):
+    async def _handle_getErrDetail(self, request):
         try:
             body = {
                 "code": -1,
@@ -109,7 +109,7 @@ class portal_api_pim(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_product_config_batch(self, request):
+    async def _handle_product_config_batch(self, request):
         try:
             json_body = json.loads(await request.text())
             data = []

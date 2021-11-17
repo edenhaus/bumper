@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-import asyncio
+import json
 import logging
 import random
 import string
-from datetime import datetime, timedelta
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class portal_api_iot(plugins.ConfServerApp):
@@ -22,7 +20,7 @@ class portal_api_iot(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/iot/devmanager.do",
-                self.handle_devmanager_botcommand,
+                self._handle_devmanager_botcommand,
                 name="portal_api_iot_devmanager",
             ),
         ]
@@ -31,7 +29,7 @@ class portal_api_iot(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_devmanager_botcommand(self, request):
+    async def _handle_devmanager_botcommand(self, request):
         try:
             json_body = json.loads(await request.text())
 

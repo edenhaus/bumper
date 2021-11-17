@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class v1_private_message(plugins.ConfServerApp):
@@ -20,13 +18,13 @@ class v1_private_message(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/message/hasUnreadMsg",
-                self.handle_hasUnreadMessage,
+                self._handle_hasUnreadMessage,
                 name="v1_message_hasUnreadMsg",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/message/getMsgList",
-                self.handle_getMsgList,
+                self._handle_getMsgList,
                 name="v1_message_getMsgList",
             ),
         ]
@@ -35,7 +33,7 @@ class v1_private_message(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_hasUnreadMessage(self, request):  # EcoVacs Home
+    async def _handle_hasUnreadMessage(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -50,7 +48,7 @@ class v1_private_message(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getMsgList(self, request):  # EcoVacs Home
+    async def _handle_getMsgList(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,

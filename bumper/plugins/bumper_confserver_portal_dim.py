@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-import asyncio
+import json
 import logging
 import random
 import string
-from datetime import datetime, timedelta
 
 from aiohttp import web
 
 import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class portal_api_dim(plugins.ConfServerApp):
@@ -22,7 +20,7 @@ class portal_api_dim(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/dim/devmanager.do",
-                self.handle_dim_devmanager,
+                self._handle_dim_devmanager,
                 name="portal_api_dim_devmanager",
             ),
         ]
@@ -31,7 +29,7 @@ class portal_api_dim(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_dim_devmanager(self, request):  # Used in EcoVacs Home App
+    async def _handle_dim_devmanager(self, request):  # Used in EcoVacs Home App
         try:
             json_body = json.loads(await request.text())
 
@@ -42,7 +40,7 @@ class portal_api_dim(plugins.ConfServerApp):
 
             if did != "":
                 bot = bumper.bot_get(did)
-                if bot["company"] == "eco-ng" and bot["mqtt_connection"] == True:
+                if bot["company"] == "eco-ng" and bot["mqtt_connection"] is True:
                     retcmd = await bumper.mqtt_helperbot.send_command(
                         json_body, randomid
                     )

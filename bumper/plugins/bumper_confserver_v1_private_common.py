@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import json
 import logging
+from datetime import datetime
 
 from aiohttp import web
 
+import bumper
 from bumper import plugins
-from bumper.models import *
 
 
 class v1_private_common(plugins.ConfServerApp):
@@ -17,49 +19,49 @@ class v1_private_common(plugins.ConfServerApp):
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/checkAPPVersion",
-                self.handle_checkAPPVersion,
+                self._handle_checkAPPVersion,
                 name="v1_common_checkAppVersion",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/checkVersion",
-                self.handle_checkVersion,
+                self._handle_checkVersion,
                 name="v1_common_checkVersion",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/uploadDeviceInfo",
-                self.handle_uploadDeviceInfo,
+                self._handle_uploadDeviceInfo,
                 name="v1_common_uploadDeviceInfo",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/getSystemReminder",
-                self.handle_getSystemReminder,
+                self._handle_getSystemReminder,
                 name="v1_common_getSystemReminder",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/getConfig",
-                self.handle_getConfig,
+                self._handle_getConfig,
                 name="v1_common_getConfig",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/getAreas",
-                self.handle_getAreas,
+                self._handle_getAreas,
                 name="v1_common_getAreas",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/getAgreementURLBatch",
-                self.handle_getAgreementURLBatch,
+                self._handle_getAgreementURLBatch,
                 name="v1_common_getAgreementURLBatch",
             ),
             web.route(
                 "*",
                 "/private/{country}/{language}/{devid}/{apptype}/{appversion}/{devtype}/{aid}/common/getTimestamp",
-                self.handle_getTimestamp,
+                self._handle_getTimestamp,
                 name="v1_common_getTimestamp",
             ),
         ]
@@ -68,7 +70,7 @@ class v1_private_common(plugins.ConfServerApp):
             bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
         )
 
-    async def handle_checkVersion(self, request):
+    async def _handle_checkVersion(self, request):
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -90,7 +92,7 @@ class v1_private_common(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_checkAPPVersion(self, request):  # EcoVacs Home
+    async def _handle_checkAPPVersion(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -115,7 +117,7 @@ class v1_private_common(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_uploadDeviceInfo(self, request):  # EcoVacs Home
+    async def _handle_uploadDeviceInfo(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -130,7 +132,7 @@ class v1_private_common(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getSystemReminder(self, request):  # EcoVacs Home
+    async def _handle_getSystemReminder(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -152,7 +154,7 @@ class v1_private_common(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getConfig(self, request):
+    async def _handle_getConfig(self, request):
         try:
             data = []
             for key in request.query["keys"].split(","):
@@ -171,9 +173,9 @@ class v1_private_common(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getAreas(self, request):
+    async def _handle_getAreas(self, request):
         try:
-            with open('bumper_confserver_v1_private_common_area.json') as json_file:
+            with open("bumper_confserver_v1_private_common_area.json") as json_file:
                 body = {
                     "code": bumper.RETURN_API_SUCCESS,
                     "data": json.load(json_file),
@@ -187,7 +189,7 @@ class v1_private_common(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getAgreementURLBatch(self, request):  # EcoVacs Home
+    async def _handle_getAgreementURLBatch(self, request):  # EcoVacs Home
         try:
             body = {
                 "code": bumper.RETURN_API_SUCCESS,
@@ -219,7 +221,7 @@ class v1_private_common(plugins.ConfServerApp):
         except Exception as e:
             logging.exception(f"{e}")
 
-    async def handle_getTimestamp(self, request):  # EcoVacs Home
+    async def _handle_getTimestamp(self, request):  # EcoVacs Home
         try:
             time = self.get_milli_time(datetime.utcnow().timestamp())
             body = {
