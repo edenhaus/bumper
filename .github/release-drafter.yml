@@ -1,0 +1,53 @@
+name-template: "$RESOLVED_VERSION"
+tag-template: "$RESOLVED_VERSION"
+change-template: "- #$NUMBER $TITLE @$AUTHOR"
+sort-direction: ascending
+filter-by-commitish: true
+categories:
+  - title: ":boom: Breaking changes"
+    label: "pr: Breaking Change"
+
+  - title: ":sparkles: New features"
+    label: "pr: new-feature"
+
+  - title: ":zap: Enhancements"
+    label: "pr: enhancement"
+
+  - title: ":recycle: Refactor"
+    label: "pr: refactor"
+
+  - title: ":bug: Bug Fixes"
+    label: "pr: bugfix"
+
+  - title: ":arrow_up: Dependency Updates"
+    labels:
+      - "pr: dependency-update"
+      - "dependencies"
+
+include-labels:
+  - "pr: Breaking Change"
+  - "pr: enhancement"
+  - "pr: dependency-update"
+  - "pr: new-feature"
+  - "pr: bugfix"
+  - "pr: refactor"
+
+version-resolver:
+  major:
+    labels:
+      - "pr: Breaking Change"
+  minor:
+    labels:
+      - "pr: enhancement"
+      - "pr: dependency-update"
+      - "pr: new-feature"
+  patch:
+    labels:
+      - "pr: bugfix"
+  default: minor
+
+template: |
+  $CHANGES
+
+  **Like my work and want to support me?**
+  <a href="https://www.buymeacoffee.com/edenhaus" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-black.png" width="150px" height="35px" alt="Buy Me A Coffee" style="height: 35px !important;width: 150px !important;" ></a>

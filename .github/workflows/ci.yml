@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  DEFAULT_PYTHON: 3.7
+
+jobs:
+  code-quality:
+    runs-on: "ubuntu-latest"
+    name: Check code quality
+    steps:
+      - uses: "actions/checkout@v2"
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        id: python
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+      - name: Run mypy
+        # Cannot be run by pre-commit.ci as repo is local
+        run: pre-commit run --all-files --show-diff-on-failure mypy
+      - name: Pylint review
+        # Cannot be run by pre-commit.ci as repo is local
+        run: pre-commit run --all-files --show-diff-on-failure pylint
+      - name:
+          Verify no getLogger usages
+          # Cannot be run by pre-commit.ci as repo is local
+        run: pre-commit run --all-files --show-diff-on-failure verifyNoGetLogger
+
+  tests:
+    runs-on: "ubuntu-latest"
+    name: Run tests
+    steps:
+      - uses: "actions/checkout@v2"
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        id: python
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+      - name: Run pytest
+        run: |
+          pytest

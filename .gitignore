@@ -1,22 +1,23 @@
-# Ignore pycache
 __pycache__
+Pipfile
+Pipfile.lock
+scratch*
+.idea
+build
+dist
+venv
 
-# Ignore .hidden files
-.*
+# Nosetests files
+cover/
+.coverage
 
-# Except .
-!.github/
-!.gitignore
-!.dockerignore
-!.travis.yml
+# Ignore Vscode files
+.vscode
 
-# Ignore items in test (report, cache, etc), except files starting with test
-tests/* 
-!tests/test*
-!tests/test_certs
-!tests/pytest.ini
-!tests/passwd
-!tests/passwd_bad
+.noseids
+nosetests.xml
+
+.mypy_cache
 
 # Ignore logs/data/certs
 logs/*
@@ -24,9 +25,6 @@ data/*
 !data/web*
 certs/*
 
-# Except README in logs/data/certs
 !logs/README.md
 !data/README.md
 !certs/README.md
-
-venv/
