@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import asyncio
-from aiohttp import web
-from bumper import plugins
 import logging
-import bumper
-from bumper.models import *
-from bumper import plugins
-from datetime import datetime, timedelta
 import os
+from datetime import datetime, timedelta
+
+from aiohttp import web
+
+import bumper
+from bumper import plugins
+from bumper.models import *
 
 
 class upload_global(plugins.ConfServerApp):

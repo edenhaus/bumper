@@ -9,7 +9,7 @@ from typing import Optional
 from bumper.confserver import ConfServer
 from bumper.db import *
 from bumper.models import *
-from bumper.mqttserver import MQTTServer, MQTTHelperBot
+from bumper.mqttserver import MQTTHelperBot, MQTTServer
 from bumper.util import get_logger, log_to_stdout
 from bumper.xmppserver import XMPPServer
 

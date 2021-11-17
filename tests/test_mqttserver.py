@@ -1,16 +1,18 @@
-from unittest import mock
-import bumper
 import asyncio
-import pytest
-import os
 import json
-import tinydb
-import pytest_asyncio
-import xml.etree.ElementTree as ET
-import hbmqtt
 import logging
-from testfixtures import LogCapture
+import os
 import time
+import xml.etree.ElementTree as ET
+from unittest import mock
+
+import hbmqtt
+import pytest
+import pytest_asyncio
+import tinydb
+from testfixtures import LogCapture
+
+import bumper
 
 
 async def test_helperbot_message():

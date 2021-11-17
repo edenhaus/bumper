@@ -1,17 +1,20 @@
-from unittest import mock
-import bumper
 import asyncio
-import pytest
-import os
+import datetime
 import json
-import tinydb
+import logging
+import os
+import time
+from unittest import mock
+from unittest.mock import MagicMock
+
+import pytest
 import pytest_aiohttp
 import pytest_asyncio
-import datetime, time
+import tinydb
 from aiohttp import web
-import logging
 from testfixtures import LogCapture
-from unittest.mock import MagicMock
+
+import bumper
 
 
 def create_confserver():

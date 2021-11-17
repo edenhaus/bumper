@@ -4,17 +4,18 @@ import logging
 import os
 from datetime import datetime, timedelta
 
-from tinydb import TinyDB, Query
+from tinydb import Query, TinyDB
 
 import bumper
-from .util import get_logger
 from bumper.models import (
-    VacBotClient,
-    VacBotDevice,
     BumperUser,
     EcoVacsHomeProducts,
     OAuth,
+    VacBotClient,
+    VacBotDevice,
 )
+
+from .util import get_logger
 
 bumperlog = get_logger("bumper")
 

@@ -11,6 +11,7 @@ from aiohttp import web
 
 from bumper import plugins
 from bumper.models import *
+
 from .util import get_logger
 
 

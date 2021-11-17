@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-from aiohttp import web
 import logging
+from datetime import datetime
+
+from aiohttp import web
+
 import bumper
 from bumper import plugins
-from datetime import datetime
 
 
 class v1_private_userSetting(plugins.ConfServerApp):
