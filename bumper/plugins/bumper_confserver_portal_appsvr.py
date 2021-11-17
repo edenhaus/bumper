@@ -143,7 +143,7 @@ class portal_api_appsvr(plugins.ConfServerApp):
                 # "auth": {
                 #     "realm": "ecouser.net",
                 #     "resource": "res",
-                #     "token": "toke",
+                #     "token": "token",
                 #     "userid": "userid",
                 #     "with": "users"
                 # },

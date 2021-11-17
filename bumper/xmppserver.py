@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
+import asyncio
+import base64
 import logging
 import re
+import ssl
 import uuid
 import xml.etree.ElementTree as ET
-import base64
-import ssl
-import bumper
-import asyncio
 
+import bumper
 from bumper import get_logger
 
 xmppserverlog = get_logger("xmppserver")
@@ -756,7 +756,7 @@ class XMPPAsyncClient:
             if (
                 "no element found" in e.msg
             ):  # Element not closed or not all bytes received
-                # Happens wth connect stream often
+                # Happens with connect stream often
                 if "<stream:stream " in newdata:
                     if self.state == self.CONNECT or self.state == self.INIT:
                         self._handle_connect(newdata.encode("utf-8"))

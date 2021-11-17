@@ -1,15 +1,17 @@
-from unittest import mock
-import bumper
 import asyncio
-import pytest
-import os
 import json
-import tinydb
-import pytest_asyncio
-import xml.etree.ElementTree as ET
+import os
 import socket
-from testfixtures import LogCapture
 import ssl
+import xml.etree.ElementTree as ET
+from unittest import mock
+
+import pytest
+import pytest_asyncio
+import tinydb
+from testfixtures import LogCapture
+
+import bumper
 
 
 def return_send_data(data, *args, **kwargs):
@@ -312,7 +314,7 @@ async def test_client_init(*args, **kwargs):
     # Reset mock calls
     mock_send.reset_mock()
 
-    # Send presense from client
+    # Send presence from client
     test_data = b'<presence type="available"/>'
     xmppclient._parse_data(test_data)
 
@@ -418,7 +420,7 @@ async def test_bot_init(*args, **kwargs):
     # Reset mock calls
     mock_send.reset_mock()
 
-    # Send presense from bot
+    # Send presence from bot
     test_data = b"<presence><status>hello world</status></presence><iq type='result' from='E0000000000000001234@159.ecorobot.net/atom' to='ecouser.net' id='s2c1'/>"
     xmppclient._parse_data(test_data)
 
