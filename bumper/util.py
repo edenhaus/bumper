@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 from logging.handlers import RotatingFileHandler
-
 from typing import MutableMapping
 
 logformat = logging.Formatter(
@@ -22,7 +21,9 @@ def get_logger(name: str, rotate: RotatingFileHandler = None) -> logging.Logger:
 
     if not log_to_stdout:
         if not rotate:
-            rotate = RotatingFileHandler(f"logs/{name}.log", maxBytes=5000000, backupCount=5)
+            rotate = RotatingFileHandler(
+                f"logs/{name}.log", maxBytes=5000000, backupCount=5
+            )
             rotate.setFormatter(logformat)
         logger.addHandler(rotate)
     else:
@@ -31,8 +32,12 @@ def get_logger(name: str, rotate: RotatingFileHandler = None) -> logging.Logger:
     __loggers[name] = logger
 
     if name == "mqttserver":
-        get_logger("transitions", rotate).setLevel(logging.CRITICAL + 1)  # Ignore this logger
-        get_logger("passlib", rotate).setLevel(logging.CRITICAL + 1)  # Ignore this logger
+        get_logger("transitions", rotate).setLevel(
+            logging.CRITICAL + 1
+        )  # Ignore this logger
+        get_logger("passlib", rotate).setLevel(
+            logging.CRITICAL + 1
+        )  # Ignore this logger
         get_logger("hbmqtt.broker", rotate)
         get_logger("hbmqtt.mqtt.protocol", rotate)
         get_logger("hbmqtt.client", rotate)
