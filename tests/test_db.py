@@ -79,7 +79,7 @@ def test_user_db():
         {
             "userid": "testuser",
             "token": "token_1234",
-            "expiration": "{}".format(datetime.now() + timedelta(seconds=-10)),
+            "expiration": f"{datetime.now() + timedelta(seconds=-10)}",
         }
     )  # Add expired token
     db.close()
@@ -93,7 +93,7 @@ def test_user_db():
         {
             "userid": "testuser",
             "token": "token_1234",
-            "expiration": "{}".format(datetime.now() + timedelta(seconds=-10)),
+            "expiration": f"{datetime.now() + timedelta(seconds=-10)}",
         }
     )  # Add expired token
     db.close()

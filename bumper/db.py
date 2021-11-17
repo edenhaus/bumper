@@ -8,7 +8,13 @@ from tinydb import TinyDB, Query
 
 import bumper
 from .util import get_logger
-from bumper.models import VacBotClient, VacBotDevice, BumperUser, EcoVacsHomeProducts, OAuth
+from bumper.models import (
+    VacBotClient,
+    VacBotDevice,
+    BumperUser,
+    EcoVacsHomeProducts,
+    OAuth,
+)
 
 bumperlog = get_logger("bumper")
 
@@ -44,7 +50,7 @@ def user_add(userid):
 
     user = user_get(userid)
     if not user:
-        bumperlog.info("Adding new user with userid: {}".format(newuser.userid))
+        bumperlog.info(f"Adding new user with userid: {newuser.userid}")
         user_full_upsert(newuser.asdict())
 
 
@@ -122,7 +128,7 @@ def user_remove_bot(userid, did):
 
 def user_get_tokens(userid):
     tokens = db_get().table("tokens")
-    return tokens.search((Query().userid == userid))
+    return tokens.search(Query().userid == userid)
 
 
 def user_get_token(userid, token):
@@ -136,7 +142,7 @@ def user_add_token(userid, token):
         tokens = opendb.table("tokens")
         tmptoken = tokens.get((Query().userid == userid) & (Query().token == token))
         if not tmptoken:
-            bumperlog.debug("Adding token {} for userid {}".format(token, userid))
+            bumperlog.debug(f"Adding token {token} for userid {userid}")
             tokens.insert(
                 {
                     "userid": userid,
@@ -214,7 +220,7 @@ def revoke_expired_oauths():
             oauth = OAuth(**i)
             if datetime.now() >= datetime.fromisoformat(oauth.expire_at):
                 bumperlog.debug(
-                    "Removing oauth {} due to expiration".format(oauth.access_token)
+                    f"Removing oauth {oauth.access_token} due to expiration"
                 )
                 table.remove(doc_ids=[i.doc_id])
 
@@ -228,7 +234,7 @@ def user_revoke_expired_oauths(userid):
             oauth = OAuth(**i)
             if datetime.now() >= datetime.fromisoformat(oauth.expire_at):
                 bumperlog.debug(
-                    "Removing oauth {} due to expiration".format(oauth.access_token)
+                    f"Removing oauth {oauth.access_token} due to expiration"
                 )
                 table.remove(doc_ids=[i.doc_id])
 
@@ -243,7 +249,7 @@ def user_add_oauth(userid) -> OAuth:
             return OAuth(**entry)
         else:
             oauth = OAuth.create_new(userid)
-            bumperlog.debug("Adding oauth {} for userid {}".format(oauth.access_token, userid))
+            bumperlog.debug(f"Adding oauth {oauth.access_token} for userid {userid}")
             table.insert(oauth.toDB())
             return oauth
 
@@ -260,13 +266,13 @@ def get_disconnected_xmpp_clients():
 
 
 def check_authcode(uid, authcode):
-    bumperlog.debug("Checking for authcode: {}".format(authcode))
+    bumperlog.debug(f"Checking for authcode: {authcode}")
     tokens = db_get().table("tokens")
     tmpauth = tokens.get(
         (Query().authcode == authcode)
         & (  # Match authcode
-                (Query().userid == uid.replace("fuid_", ""))
-                | (Query().userid == "fuid_{}".format(uid))
+            (Query().userid == uid.replace("fuid_", ""))
+            | (Query().userid == f"fuid_{uid}")
         )  # Userid with or without fuid_
     )
     if tmpauth:
@@ -276,10 +282,11 @@ def check_authcode(uid, authcode):
 
 
 def loginByItToken(authcode):
-    bumperlog.debug("Checking for authcode: {}".format(authcode))
+    bumperlog.debug(f"Checking for authcode: {authcode}")
     tokens = db_get().table("tokens")
     tmpauth = tokens.get(
-        (Query().authcode == authcode)
+        Query().authcode
+        == authcode
         # & (  # Match authcode
         #    (Query().userid == uid.replace("fuid_", ""))
         #    | (Query().userid == "fuid_{}".format(uid))
@@ -292,13 +299,13 @@ def loginByItToken(authcode):
 
 
 def check_token(uid, token):
-    bumperlog.debug("Checking for token: {}".format(token))
+    bumperlog.debug(f"Checking for token: {token}")
     tokens = db_get().table("tokens")
     tmpauth = tokens.get(
         (Query().token == token)
         & (  # Match token
-                (Query().userid == uid.replace("fuid_", ""))
-                | (Query().userid == "fuid_{}".format(uid))
+            (Query().userid == uid.replace("fuid_", ""))
+            | (Query().userid == f"fuid_{uid}")
         )  # Userid with or without fuid_
     )
     if tmpauth:
@@ -326,11 +333,9 @@ def bot_add(sn, did, devclass, resource, company):
     bot = bot_get(did)
     if not bot:  # Not existing bot in database
         if (
-                not devclass == "" or "@" not in sn or "tmp" not in sn
+            not devclass == "" or "@" not in sn or "tmp" not in sn
         ):  # try to prevent bad additions to the bot list
-            bumperlog.info(
-                "Adding new bot with SN: {} DID: {}".format(newbot.name, newbot.did)
-            )
+            bumperlog.info(f"Adding new bot with SN: {newbot.name} DID: {newbot.did}")
             bot_full_upsert(newbot.asdict())
 
 
@@ -357,7 +362,11 @@ def bot_toEcoVacsHome_JSON(bot):  # EcoVacs Home
             bot["pip"] = botprod["product"]["_id"]
             bot["deviceName"] = botprod["product"]["name"]
             bot["materialNo"] = botprod["product"]["materialNo"]
-            bot["product_category"] = "DEEBOT" if botprod["product"]["name"].startswith("DEEBOT") else "UNKNOWN"
+            bot["product_category"] = (
+                "DEEBOT"
+                if botprod["product"]["name"].startswith("DEEBOT")
+                else "UNKNOWN"
+            )
             # bot["updateInfo"] = {
             #     "changeLog": "",
             #     "needUpdate": False
@@ -379,7 +388,7 @@ def bot_full_upsert(vacbot):
     if "did" in vacbot:
         bots.upsert(vacbot, Bot.did == vacbot["did"])
     else:
-        bumperlog.error("No DID in vacbot: {}".format(vacbot))
+        bumperlog.error(f"No DID in vacbot: {vacbot}")
 
 
 def bot_set_nick(did, nick):
@@ -408,7 +417,7 @@ def client_add(userid, realm, resource):
 
     client = client_get(resource)
     if not client:
-        bumperlog.info("Adding new client with resource {}".format(newclient.resource))
+        bumperlog.info(f"Adding new client with resource {newclient.resource}")
         client_full_upsert(newclient.asdict())
 
 

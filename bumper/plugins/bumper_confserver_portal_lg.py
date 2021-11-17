@@ -11,19 +11,18 @@ from bumper.models import *
 
 
 class portal_api_lg(plugins.ConfServerApp):
-
     def __init__(self):
         self.name = "portal_api_lg"
         self.plugin_type = "sub_api"
         self.sub_api = "portal_api"
 
         self.routes = [
-
             web.route("*", "/lg/log.do", self.handle_lg_log, name="portal_api_lg_log"),
-
         ]
 
-        self.get_milli_time = bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
+        self.get_milli_time = (
+            bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time
+        )
 
     async def handle_lg_log(self, request):  # EcoVacs Home
         randomid = "".join(random.sample(string.ascii_letters, 6))
@@ -64,18 +63,18 @@ class portal_api_lg(plugins.ConfServerApp):
                         json_body, randomid
                     )
                     body = retcmd
-                    logging.debug("Send Bot - {}".format(json_body))
-                    logging.debug("Bot Response - {}".format(body))
+                    logging.debug(f"Send Bot - {json_body}")
+                    logging.debug(f"Bot Response - {body}")
                     logs = []
                     logsroot = ET.fromstring(retcmd["resp"])
                     if logsroot.attrib["ret"] == "ok":
                         cleanlogs = logsroot.getchildren()
                         for l in cleanlogs:
                             cleanlog = {
-                                "ts": l.attrib['s'],
-                                "area": l.attrib['a'],
-                                "last": l.attrib['l'],
-                                "cleanType": l.attrib['t'],
+                                "ts": l.attrib["s"],
+                                "area": l.attrib["a"],
+                                "last": l.attrib["l"],
+                                "cleanType": l.attrib["t"],
                                 # imageUrl allows for providing images of cleanings, something to look into later
                                 # "imageUrl": "https://localhost:8007",
                             }
@@ -88,7 +87,7 @@ class portal_api_lg(plugins.ConfServerApp):
                     else:
                         body = {"ret": "ok", "logs": []}
 
-                    logging.debug("lg logs return: {}".format(json.dumps(body)))
+                    logging.debug(f"lg logs return: {json.dumps(body)}")
                     return web.json_response(body)
                 else:
                     # No response, send error back
@@ -99,7 +98,7 @@ class portal_api_lg(plugins.ConfServerApp):
                     )
 
         except Exception as e:
-            logging.exception("{}".format(e))
+            logging.exception(f"{e}")
 
         body = {"id": randomid, "errno": bumper.ERR_COMMON, "ret": "fail"}
         return web.json_response(body)

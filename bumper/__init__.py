@@ -66,7 +66,7 @@ sys.path.append(os.path.join(data_dir, "plugins"))
 discovered_plugins = {
     name: importlib.import_module(name)
     for finder, name, ispkg in pkgutil.iter_modules()
-    if name.startswith('bumper_')
+    if name.startswith("bumper_")
 }
 
 shutting_down = False
@@ -104,9 +104,9 @@ async def start():
         return
 
     if not (
-            os.path.exists(ca_cert)
-            and os.path.exists(server_cert)
-            and os.path.exists(server_key)
+        os.path.exists(ca_cert)
+        and os.path.exists(server_cert)
+        and os.path.exists(server_key)
     ):
         bumperlog.fatal("Certificate(s) don't exist at paths specified")
         return
@@ -143,9 +143,15 @@ async def start():
     # Start web servers
     conf_server.confserver_app()
     asyncio.create_task(
-        conf_server.start_site(conf_server.app, address=bumper_listen, port=conf1_listen_port, usessl=True))
+        conf_server.start_site(
+            conf_server.app, address=bumper_listen, port=conf1_listen_port, usessl=True
+        )
+    )
     asyncio.create_task(
-        conf_server.start_site(conf_server.app, address=bumper_listen, port=conf2_listen_port, usessl=False))
+        conf_server.start_site(
+            conf_server.app, address=bumper_listen, port=conf2_listen_port, usessl=False
+        )
+    )
 
     # Start maintenance
     while not shutting_down:
@@ -183,7 +189,7 @@ async def shutdown():
         bumperlog.info("Coroutine canceled")
 
     except Exception as e:
-        bumperlog.info("Exception: {}".format(e))
+        bumperlog.info(f"Exception: {e}")
 
     finally:
         bumperlog.info("Shutdown complete")
@@ -200,18 +206,17 @@ def main(argv=None):
     try:
 
         if not (
-                os.path.exists(ca_cert)
-                and os.path.exists(server_cert)
-                and os.path.exists(server_key)
+            os.path.exists(ca_cert)
+            and os.path.exists(server_cert)
+            and os.path.exists(server_key)
         ):
             msg = "No certs found! Please generate them (More infos in the docs)"
             bumperlog.fatal(msg)
             sys.exit(msg)
 
-        if not (
-                os.path.exists(os.path.join(data_dir, "passwd"))
-        ):
-            with open(os.path.join(data_dir, "passwd"), 'w'): pass
+        if not (os.path.exists(os.path.join(data_dir, "passwd"))):
+            with open(os.path.join(data_dir, "passwd"), "w"):
+                pass
 
         parser = argparse.ArgumentParser()
         parser.add_argument(

@@ -1,5 +1,5 @@
-import mock
-from mock import patch
+from unittest import mock
+from unittest.mock import patch
 import pytest
 from tinydb.storages import MemoryStorage
 from tinydb import TinyDB, Query
@@ -59,4 +59,3 @@ async def test_start_stop_debug():
             ("bumper", "INFO", "Shutting down"), ("bumper", "INFO", "Shutdown complete")
         )
         assert b.shutting_down == True
-

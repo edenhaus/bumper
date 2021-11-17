@@ -6,9 +6,9 @@ from datetime import datetime, timedelta
 import bumper
 
 
-class VacBotDevice(object):
+class VacBotDevice:
     def __init__(
-            self, did="", vac_bot_device_class="", resource="", name="", nick="", company=""
+        self, did="", vac_bot_device_class="", resource="", name="", nick="", company=""
     ):
         self.vac_bot_device_class = vac_bot_device_class
         self.company = company
@@ -32,7 +32,7 @@ class VacBotDevice(object):
         }
 
 
-class BumperUser(object):
+class BumperUser:
     def __init__(self, userid=""):
         self.userid = userid
         self.devices = []
@@ -50,7 +50,7 @@ class GlobalVacBotDevice(VacBotDevice):  # EcoVacs Home
     deviceName = ""
 
 
-class VacBotClient(object):
+class VacBotClient:
     def __init__(self, userid="", realm="", token=""):
         self.userid = userid
         self.realm = realm
@@ -101,7 +101,9 @@ class OAuth:
         oauth = OAuth()
         oauth.userId = userId
         oauth.access_token = uuid.uuid4().hex
-        oauth.expire_at = "{}".format(datetime.utcnow() + timedelta(days=bumper.oauth_validity_days))
+        oauth.expire_at = (
+            f"{datetime.utcnow() + timedelta(days=bumper.oauth_validity_days)}"
+        )
         oauth.refresh_token = uuid.uuid4().hex
         return oauth
 
@@ -110,8 +112,11 @@ class OAuth:
 
     def toResponse(self):
         data = self.__dict__
-        data["expire_at"] = bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time(
-            datetime.fromisoformat(self.expire_at).timestamp())
+        data[
+            "expire_at"
+        ] = bumper.ConfServer.ConfServer_GeneralFunctions().get_milli_time(
+            datetime.fromisoformat(self.expire_at).timestamp()
+        )
         return data
 
 
@@ -132,10 +137,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2d996c4d60de0001eaf2b5"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2d996c4d60de0001eaf2b5",
+        },
     },
     {
         "classid": "vsc5ia",
@@ -151,10 +156,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c874326280fda0001770d2a"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c874326280fda0001770d2a",
+        },
     },
     {
         "classid": "zi1uwd",
@@ -170,10 +175,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5da834a8d66cd10001f58265"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5da834a8d66cd10001f58265",
+        },
     },
     {
         "classid": "12baap",
@@ -189,10 +194,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425981269020008a9627b"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425981269020008a9627b",
+        },
     },
     {
         "classid": "02uwxm",
@@ -208,10 +213,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b1dddc48bc45700014035a1"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b1dddc48bc45700014035a1",
+        },
     },
     {
         "classid": "eyi9jv",
@@ -227,10 +232,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b7b65f176f7f10001e9a0c2"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b7b65f176f7f10001e9a0c2",
+        },
     },
     {
         "classid": "9rft3c",
@@ -246,10 +251,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6062795ad18cbd0008e2fce8"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6062795ad18cbd0008e2fce8",
+        },
     },
     {
         "classid": "141",
@@ -265,10 +270,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c2aa64d60de0001eaf1f6"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c2aa64d60de0001eaf1f6",
+        },
     },
     {
         "classid": "fqxoiu",
@@ -284,10 +289,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605b059217c95b0008ff20d4"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605b059217c95b0008ff20d4",
+        },
     },
     {
         "classid": "u6eqoa",
@@ -303,10 +308,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425a11269020008a9627d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425a11269020008a9627d",
+        },
     },
     {
         "classid": "dl8fht",
@@ -322,10 +327,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5acc32067c295c0001876eea"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5acc32067c295c0001876eea",
+        },
     },
     {
         "classid": "yna5xi",
@@ -341,10 +346,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606278df4a84d700082b39f1"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606278df4a84d700082b39f1",
+        },
     },
     {
         "classid": "123",
@@ -360,10 +365,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c150dba13eb00013feaae"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c150dba13eb00013feaae",
+        },
     },
     {
         "classid": "140",
@@ -379,10 +384,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c152f4d60de0001eaf1f4"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c152f4d60de0001eaf1f4",
+        },
     },
     {
         "classid": "q1v5dn",
@@ -398,10 +403,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d83375f6b6a570001569e26"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d83375f6b6a570001569e26",
+        },
     },
     {
         "classid": "16wdph",
@@ -417,10 +422,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d280ce3350e7a0001e84c95"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d280ce3350e7a0001e84c95",
+        },
     },
     {
         "classid": "rvo6ev",
@@ -436,10 +441,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426feb0a931000860fad5"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426feb0a931000860fad5",
+        },
     },
     {
         "classid": "09m4bu",
@@ -455,10 +460,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ef31b8cee3c1200075b6f67"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ef31b8cee3c1200075b6f67",
+        },
     },
     {
         "classid": "y2qy3m",
@@ -474,10 +479,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425784a84d700082b39f6"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425784a84d700082b39f6",
+        },
     },
     {
         "classid": "0xyhhr",
@@ -493,10 +498,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d117d4f0ac6ad00012b792d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d117d4f0ac6ad00012b792d",
+        },
     },
     {
         "classid": "ipzjy0",
@@ -512,10 +517,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426c64a84d700082b39fa"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426c64a84d700082b39fa",
+        },
     },
     {
         "classid": "hsgwhi",
@@ -531,10 +536,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e731a4a06f6de700464c69d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e731a4a06f6de700464c69d",
+        },
     },
     {
         "classid": "h18jkh",
@@ -550,10 +555,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e8e8d146482551d72530e47"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e8e8d146482551d72530e47",
+        },
     },
     {
         "classid": "126",
@@ -569,10 +574,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca32ab2e9e9270001354b3d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca32ab2e9e9270001354b3d",
+        },
     },
     {
         "classid": "x5d34r",
@@ -588,10 +593,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605053e7fc527c00087fda1e"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605053e7fc527c00087fda1e",
+        },
     },
     {
         "classid": "ls1ok3",
@@ -607,10 +612,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ba4a2cb6c2f120001c32839"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ba4a2cb6c2f120001c32839",
+        },
     },
     {
         "classid": "y79a7u",
@@ -626,10 +631,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b04c0217ccd1a0001e1f6a7"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b04c0217ccd1a0001e1f6a7",
+        },
     },
     {
         "classid": "vi829v",
@@ -645,10 +650,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606278d3fc527c00087fdb08"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606278d3fc527c00087fdb08",
+        },
     },
     {
         "classid": "55aiho",
@@ -664,10 +669,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605be27250928b0007c13264"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605be27250928b0007c13264",
+        },
     },
     {
         "classid": "gd4uut",
@@ -683,10 +688,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e8da019032edd9008c66bf0"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e8da019032edd9008c66bf0",
+        },
     },
     {
         "classid": "130",
@@ -702,10 +707,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d4b7640de51dd0001fee131"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d4b7640de51dd0001fee131",
+        },
     },
     {
         "classid": "2pv572",
@@ -721,10 +726,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d1474632a6bd50001b5b6f3"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d1474632a6bd50001b5b6f3",
+        },
     },
     {
         "classid": "xb83mv",
@@ -740,10 +745,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d3fe649de51dd0001fee0de"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d3fe649de51dd0001fee0de",
+        },
     },
     {
         "classid": "ar5bjb",
@@ -759,10 +764,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e58a2df36e8f39e318f031d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e58a2df36e8f39e318f031d",
+        },
     },
     {
         "classid": "7j1tu6",
@@ -778,10 +783,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6064260545505e0008e5cb49"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6064260545505e0008e5cb49",
+        },
     },
     {
         "classid": "ts2ofl",
@@ -797,10 +802,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425dfd18cbd0008e2fcf3"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425dfd18cbd0008e2fcf3",
+        },
     },
     {
         "classid": "125",
@@ -816,10 +821,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c14414d60de0001eaf1f2"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c14414d60de0001eaf1f2",
+        },
     },
     {
         "classid": "jh3ry2",
@@ -835,10 +840,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6049b34d1269020008a95aef"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6049b34d1269020008a95aef",
+        },
     },
     {
         "classid": "wlqdkp",
@@ -854,10 +859,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6064263ad18cbd0008e2fcf4"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6064263ad18cbd0008e2fcf4",
+        },
     },
     {
         "classid": "c0lwyn",
@@ -873,10 +878,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425ab4a84d700082b39f7"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425ab4a84d700082b39f7",
+        },
     },
     {
         "classid": "emzppx",
@@ -892,10 +897,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c931fef280fda0001770d7e"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c931fef280fda0001770d7e",
+        },
     },
     {
         "classid": "115",
@@ -911,10 +916,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5cf711aeb0acfc000179ff8a"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5cf711aeb0acfc000179ff8a",
+        },
     },
     {
         "classid": "jr3pqa",
@@ -930,10 +935,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b5ac4cc8d5a56000111e769"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b5ac4cc8d5a56000111e769",
+        },
     },
     {
         "classid": "142",
@@ -949,10 +954,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca1ca79e9e9270001354b2d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca1ca79e9e9270001354b2d",
+        },
     },
     {
         "classid": "aqdd5p",
@@ -968,10 +973,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5cb7cfbab72c4d00010e5fc7"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5cb7cfbab72c4d00010e5fc7",
+        },
     },
     {
         "classid": "152",
@@ -987,10 +992,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d4b7628de51dd0001fee12f"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d4b7628de51dd0001fee12f",
+        },
     },
     {
         "classid": "d0cnel",
@@ -1006,10 +1011,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d157f9f77a3a60001051f69"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d157f9f77a3a60001051f69",
+        },
     },
     {
         "classid": "u4h1uk",
@@ -1025,10 +1030,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425bed18cbd0008e2fcf2"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425bed18cbd0008e2fcf2",
+        },
     },
     {
         "classid": "3ab24g",
@@ -1044,10 +1049,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ef31b80f5dcdf000767cf4d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ef31b80f5dcdf000767cf4d",
+        },
     },
     {
         "classid": "9akc61",
@@ -1063,10 +1068,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c932067280fda0001770d7f"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c932067280fda0001770d7f",
+        },
     },
     {
         "classid": "159",
@@ -1082,10 +1087,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d4b7606de51dd0001fee12d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d4b7606de51dd0001fee12d",
+        },
     },
     {
         "classid": "b742vd",
@@ -1101,10 +1106,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e8e93a7032edd3f5ec66d4a"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e8e93a7032edd3f5ec66d4a",
+        },
     },
     {
         "classid": "uv242z",
@@ -1120,10 +1125,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b5ac4e45f21100001882bb9"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5b5ac4e45f21100001882bb9",
+        },
     },
     {
         "classid": "155",
@@ -1139,10 +1144,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5cd4ca505b032200015a455d"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5cd4ca505b032200015a455d",
+        },
     },
     {
         "classid": "1qdu4z",
@@ -1158,10 +1163,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e71c7df298f0d9cabfef86f"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e71c7df298f0d9cabfef86f",
+        },
     },
     {
         "classid": "4zfacv",
@@ -1177,10 +1182,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c778731280fda0001770ba0"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c778731280fda0001770ba0",
+        },
     },
     {
         "classid": "nq9yhl",
@@ -1196,10 +1201,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426ebb0a931000860fad4"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426ebb0a931000860fad4",
+        },
     },
     {
         "classid": "m7lqzi",
@@ -1215,10 +1220,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c63a5ba13eb00013feab7"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d2c63a5ba13eb00013feab7",
+        },
     },
     {
         "classid": "r8ead0",
@@ -1234,10 +1239,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c93204b63023c0001e7faa7"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5c93204b63023c0001e7faa7",
+        },
     },
     {
         "classid": "jjccwk",
@@ -1253,10 +1258,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d3aa309ba13eb00013feb69"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5d3aa309ba13eb00013feb69",
+        },
     },
     {
         "classid": "129",
@@ -1272,10 +1277,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca31df112851900016858c0"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca31df112851900016858c0",
+        },
     },
     {
         "classid": "165",
@@ -1291,10 +1296,10 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca32a1012851900016858c6"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5ca32a1012851900016858c6",
+        },
     },
     {
         "classid": "jffnlf",
@@ -1310,10 +1315,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e53207a26be71596c4b55cd"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5e53207a26be71596c4b55cd",
+        },
     },
     {
         "classid": "d4v1pm",
@@ -1329,10 +1334,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426254a84d700082b39f9"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606426254a84d700082b39f9",
+        },
     },
     {
         "classid": "34vhpm",
@@ -1348,10 +1353,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605050031269020008a95af9"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/605050031269020008a95af9",
+        },
     },
     {
         "classid": "tpnwyu",
@@ -1367,10 +1372,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6050503e1269020008a95afa"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6050503e1269020008a95afa",
+        },
     },
     {
         "classid": "wgxm70",
@@ -1386,10 +1391,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5edf2bbedb28cc00062f8bd7"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5edf2bbedb28cc00062f8bd7",
+        },
     },
     {
         "classid": "1zqysa",
@@ -1405,10 +1410,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6064258d1269020008a9627a"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6064258d1269020008a9627a",
+        },
     },
     {
         "classid": "chmi0g",
@@ -1424,10 +1429,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425821269020008a96279"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/606425821269020008a96279",
+        },
     },
     {
         "classid": "p5nx9u",
@@ -1443,10 +1448,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5f59e774c0f03a0008ee72e0"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5f59e774c0f03a0008ee72e0",
+        },
     },
     {
         "classid": "n6cwdb",
@@ -1462,10 +1467,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627a92fc527c00087fdb0a"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627a92fc527c00087fdb0a",
+        },
     },
     {
         "classid": "lhbd50",
@@ -1481,10 +1486,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/603f51243b03f50007b6c2ca"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/603f51243b03f50007b6c2ca",
+        },
     },
     {
         "classid": "ucn2xe",
@@ -1500,10 +1505,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/603f510e3b03f50007b6c2c9"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/603f510e3b03f50007b6c2c9",
+        },
     },
     {
         "classid": "0bdtzz",
@@ -1519,10 +1524,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5fa105bbd16a99000667eb52"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5fa105bbd16a99000667eb52",
+        },
     },
     {
         "classid": "r5zxjr",
@@ -1538,10 +1543,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627c09b0a931000860facd"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627c09b0a931000860facd",
+        },
     },
     {
         "classid": "r5y7re",
@@ -1557,10 +1562,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627a9cb0a931000860fac7"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627a9cb0a931000860fac7",
+        },
     },
     {
         "classid": "snxbvc",
@@ -1576,10 +1581,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bbfb0a931000860fac9"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bbfb0a931000860fac9",
+        },
     },
     {
         "classid": "7bryc5",
@@ -1595,10 +1600,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5fb474d4d16a99000667edd9"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5fb474d4d16a99000667edd9",
+        },
     },
     {
         "classid": "b2jqs4",
@@ -1614,10 +1619,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5feaeb27d4cb3a0006679047"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5feaeb27d4cb3a0006679047",
+        },
     },
     {
         "classid": "yu362x",
@@ -1633,10 +1638,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bde50928b0007c13273"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bde50928b0007c13273",
+        },
     },
     {
         "classid": "ifbw08",
@@ -1652,10 +1657,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5feaeb47d4cb3a0006679048"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5feaeb47d4cb3a0006679048",
+        },
     },
     {
         "classid": "85as7h",
@@ -1671,10 +1676,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5feaeb585f437d0008e0e00c"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/5feaeb585f437d0008e0e00c",
+        },
     },
     {
         "classid": "ty84oi",
@@ -1690,10 +1695,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bcafc527c00087fdb0c"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bcafc527c00087fdb0c",
+        },
     },
     {
         "classid": "36xnxf",
@@ -1709,10 +1714,10 @@ EcoVacsHomeProducts = [
                 "share": True,
                 "tmjl": False,
                 "assistant": True,
-                "alexa": True
+                "alexa": True,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bd517c95b0008ff20ec"
-        }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/60627bd517c95b0008ff20ec",
+        },
     },
     {
         "classid": "2pj946",
@@ -1728,11 +1733,11 @@ EcoVacsHomeProducts = [
                 "share": False,
                 "tmjl": False,
                 "assistant": False,
-                "alexa": False
+                "alexa": False,
             },
-            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6049b3631269020008a95af0"
-        }
-    }
+            "iconUrl": "https://portal-ww.ecouser.net/api/pim/file/get/6049b3631269020008a95af0",
+        },
+    },
 ]
 
 RETURN_API_SUCCESS = "0000"

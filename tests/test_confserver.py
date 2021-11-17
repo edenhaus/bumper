@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import bumper
 import asyncio
 import pytest
@@ -40,29 +40,39 @@ async def test_confserver_ssl():
     conf_server.confserver_app()
     asyncio.create_task(conf_server.start_server())
 
+
 async def test_confserver_exceptions():
     with LogCapture() as l:
 
-            conf_server = bumper.ConfServer(("127.0.0.1", 8007), usessl=True)
-            conf_server.confserver_app()        
-            conf_server.site = web.TCPSite
+        conf_server = bumper.ConfServer(("127.0.0.1", 8007), usessl=True)
+        conf_server.confserver_app()
+        conf_server.site = web.TCPSite
 
-            #bind permission       
-            conf_server.site.start = mock.Mock(side_effect=OSError(1, "error while attempting to bind on address ('127.0.0.1', 8007): permission denied"))
-            await conf_server.start_server()
+        # bind permission
+        conf_server.site.start = mock.Mock(
+            side_effect=OSError(
+                1,
+                "error while attempting to bind on address ('127.0.0.1', 8007): permission denied",
+            )
+        )
+        await conf_server.start_server()
 
-            #asyncio Cancel
-            conf_server.site = web.TCPSite
-            conf_server.site.start = mock.Mock(side_effect=asyncio.CancelledError)
-            await conf_server.start_server()
+        # asyncio Cancel
+        conf_server.site = web.TCPSite
+        conf_server.site.start = mock.Mock(side_effect=asyncio.CancelledError)
+        await conf_server.start_server()
 
-            #general exception
-            conf_server.site = web.TCPSite
-            conf_server.site.start = mock.Mock(side_effect=Exception(1, "general"))
-            await conf_server.start_server()
-    
+        # general exception
+        conf_server.site = web.TCPSite
+        conf_server.site.start = mock.Mock(side_effect=Exception(1, "general"))
+        await conf_server.start_server()
+
     l.check_present(
-        ("confserver", "ERROR", "error while attempting to bind on address ('127.0.0.1', 8007): permission denied")
+        (
+            "confserver",
+            "ERROR",
+            "error while attempting to bind on address ('127.0.0.1', 8007): permission denied",
+        )
     )
 
 
@@ -87,9 +97,9 @@ def test_get_milli_time():
 async def test_base(aiohttp_client):
     remove_existing_db()
     bumper.db = "tests/tmp.db"  # Set db location for testing
-    
+
     # Start MQTT
-    mqtt_address = ("127.0.0.1", 8883)    
+    mqtt_address = ("127.0.0.1", 8883)
     mqtt_server = bumper.MQTTServer(mqtt_address, password_file="tests/passwd")
     bumper.mqtt_server = mqtt_server
     await mqtt_server.broker_coro()
@@ -99,7 +109,7 @@ async def test_base(aiohttp_client):
     xmpp_server = bumper.XMPPServer(xmpp_address)
     bumper.xmpp_server = xmpp_server
     await xmpp_server.start_async_server()
-    
+
     # Start Helperbot
     mqtt_helperbot = bumper.MQTTHelperBot(mqtt_address)
     bumper.mqtt_helperbot = mqtt_helperbot
@@ -107,7 +117,7 @@ async def test_base(aiohttp_client):
 
     client = await aiohttp_client(create_app)
     resp = await client.get("/")
-    assert resp.status == 200   
+    assert resp.status == 200
 
     mqtt_helperbot.Client.disconnect()
 
@@ -119,9 +129,9 @@ async def test_base(aiohttp_client):
 async def test_restartService(aiohttp_client):
     remove_existing_db()
     bumper.db = "tests/tmp.db"  # Set db location for testing
-    
+
     # Start MQTT
-    mqtt_address = ("127.0.0.1", 8883)    
+    mqtt_address = ("127.0.0.1", 8883)
     mqtt_server = bumper.MQTTServer(mqtt_address, password_file="tests/passwd")
     bumper.mqtt_server = mqtt_server
     await mqtt_server.broker_coro()
@@ -131,37 +141,39 @@ async def test_restartService(aiohttp_client):
     xmpp_server = bumper.XMPPServer(xmpp_address)
     bumper.xmpp_server = xmpp_server
     await xmpp_server.start_async_server()
-    
+
     # Start Helperbot
     mqtt_helperbot = bumper.MQTTHelperBot(mqtt_address)
     bumper.mqtt_helperbot = mqtt_helperbot
     await mqtt_helperbot.start_helper_bot()
 
     client = await aiohttp_client(create_app)
-    
+
     resp = await client.get("/restart_Helperbot")
-    assert resp.status == 200   
+    assert resp.status == 200
 
     resp = await client.get("/restart_MQTTServer")
-    assert resp.status == 200   
+    assert resp.status == 200
 
     resp = await client.get("/restart_XMPPServer")
-    assert resp.status == 200   
+    assert resp.status == 200
 
     mqtt_helperbot.Client.disconnect()
     await mqtt_server.broker.shutdown()
 
     xmpp_server.disconnect()
 
+
 async def test_RemoveBot(aiohttp_client):
     client = await aiohttp_client(create_app)
     resp = await client.get("/bot/remove/test_did")
-    assert resp.status == 200  
+    assert resp.status == 200
+
 
 async def test_RemoveClient(aiohttp_client):
     client = await aiohttp_client(create_app)
     resp = await client.get("/client/remove/test_resource")
-    assert resp.status == 200  
+    assert resp.status == 200
 
 
 async def test_login(aiohttp_client):
@@ -180,7 +192,7 @@ async def test_login(aiohttp_client):
     assert "username" in jsonresp["data"]
 
     remove_existing_db()
-    bumper.db = "tests/tmp.db"  # Set db location for testing 
+    bumper.db = "tests/tmp.db"  # Set db location for testing
 
     # Test global_e without user
     resp = await client.get("/v1/private/us/en/dev_1234/global_e/1/0/0/user/login")
@@ -216,11 +228,11 @@ async def test_login(aiohttp_client):
 
     # Add a bot to db that doesn't have a did
     newbot = {
-            "class": "dev_1234",
-            "company": "com_123",
-            #"did": self.did,
-            "name": "sn_1234",            
-            "resource": "res_1234",            
+        "class": "dev_1234",
+        "company": "com_123",
+        # "did": self.did,
+        "name": "sn_1234",
+        "resource": "res_1234",
     }
     bumper.bot_full_upsert(newbot)
 
@@ -592,11 +604,10 @@ async def test_getProductIotMap(aiohttp_client):
     jsonresp = json.loads(text)
     assert jsonresp["code"] == bumper.RETURN_API_SUCCESS
 
-
     # Test getPimFile
     resp = await client.get("/api/pim/file/get/123")
     assert resp.status == 200
-    
+
 
 async def test_getUsersAPI(aiohttp_client):
     remove_existing_db()
@@ -1006,6 +1017,3 @@ async def test_dim_devmanager(aiohttp_client):
     text = await resp.text()
     test_resp = json.loads(text)
     assert test_resp["ret"] == "fail"
-
-  
-

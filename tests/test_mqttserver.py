@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import bumper
 import asyncio
 import pytest
@@ -51,13 +51,11 @@ async def test_helperbot_message():
             mqtt_helperbot.Client._connected_state._value == True
         )  # Check helperbot is connected
         msg_payload = "{}"
-        msg_topic_name = (
-            "iot/p2p/GetWKVer/helperbot/bumper/helperbot/bot_serial/ls1ok3/wC3g/q/iCmuqp/j"
-        )
+        msg_topic_name = "iot/p2p/GetWKVer/helperbot/bumper/helperbot/bot_serial/ls1ok3/wC3g/q/iCmuqp/j"
         await mqtt_helperbot.Client.publish(
             msg_topic_name, msg_payload.encode(), hbmqtt.client.QOS_0
         )
-        
+
         await asyncio.wait_for(mqtt_helperbot.Client.deliver_message(), timeout=0.1)
 
         l.check_present(
@@ -77,9 +75,7 @@ async def test_helperbot_message():
             mqtt_helperbot.Client._connected_state._value == True
         )  # Check helperbot is connected
         msg_payload = '{"ret":"ok","ver":"0.13.5"}'
-        msg_topic_name = (
-            "iot/p2p/GetWKVer/bot_serial/ls1ok3/wC3g/helperbot/bumper/helperbot/p/iCmuqp/j"
-        )
+        msg_topic_name = "iot/p2p/GetWKVer/bot_serial/ls1ok3/wC3g/helperbot/bumper/helperbot/p/iCmuqp/j"
         await mqtt_helperbot.Client.publish(
             msg_topic_name, msg_payload.encode(), hbmqtt.client.QOS_0
         )
@@ -103,15 +99,12 @@ async def test_helperbot_message():
             mqtt_helperbot.Client._connected_state._value == True
         )  # Check helperbot is connected
         msg_payload = "test"
-        msg_topic_name = (
-            "iot/p2p/GetWKVer/bot_serial/ls1ok3/wC3g/TESTBAD/bumper/helperbot/p/iCmuqp/j"
-        )
+        msg_topic_name = "iot/p2p/GetWKVer/bot_serial/ls1ok3/wC3g/TESTBAD/bumper/helperbot/p/iCmuqp/j"
         await mqtt_helperbot.Client.publish(
             msg_topic_name, msg_payload.encode(), hbmqtt.client.QOS_0
         )
 
         await asyncio.wait_for(mqtt_helperbot.Client.deliver_message(), timeout=0.1)
-
 
         l.check_present(
             (
@@ -134,7 +127,7 @@ async def test_helperbot_message():
         await mqtt_helperbot.Client.publish(
             msg_topic_name, msg_payload.encode(), hbmqtt.client.QOS_0
         )
-            
+
         await asyncio.wait_for(mqtt_helperbot.Client.deliver_message(), timeout=0.1)
 
         l.check_present(
@@ -184,17 +177,15 @@ async def test_helperbot_expire_message():
 
         await asyncio.sleep(0.1)
         mqtt_helperbot.expire_msg_seconds = (
-            0.1
-        )  # Set expire message seconds to 0.1 so we don't wait 10 seconds
+            0.1  # Set expire message seconds to 0.1 so we don't wait 10 seconds
+        )
         msg_payload = "<ctl ts='1547822804960' td='DustCaseST' st='0'/>"
         msg_topic_name = "iot/atr/DustCaseST/bot_serial/ls1ok3/wC3g/x"
         await mqtt_helperbot.Client.publish(
             msg_topic_name, msg_payload.encode(), hbmqtt.client.QOS_0
         )  # Send another message to force get_msg
 
-
         await asyncio.wait_for(mqtt_helperbot.Client.deliver_message(), timeout=0.1)
-
 
         assert {
             "time": currenttime,
@@ -214,7 +205,6 @@ async def test_helperbot_expire_message():
         mqtt_helperbot.Client.disconnect()
 
     await mqtt_server.broker.shutdown()
-    
 
 
 async def test_helperbot_sendcommand():
@@ -246,8 +236,8 @@ async def test_helperbot_sendcommand():
         },
     }
     mqtt_helperbot.wait_resp_timeout_seconds = (
-        0.1
-    )  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+        0.1  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+    )
     commandresult = await mqtt_helperbot.send_command(cmdjson, "testfail")
     # Don't send a response, ensure timeout
     assert commandresult == {
@@ -258,13 +248,11 @@ async def test_helperbot_sendcommand():
     }  # Check timeout
 
     mqtt_helperbot.wait_resp_timeout_seconds = (
-        0.2
-    )  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+        0.2  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+    )
     # Send response beforehand
     msg_payload = '{"ret":"ok","ver":"0.13.5"}'
-    msg_topic_name = (
-        "iot/p2p/GetWKVer/bot_serial/ls1ok3/wC3g/helperbot/bumper/helperbot/p/testgood/j"
-    )
+    msg_topic_name = "iot/p2p/GetWKVer/bot_serial/ls1ok3/wC3g/helperbot/bumper/helperbot/p/testgood/j"
     await mqtt_helperbot.Client.publish(
         msg_topic_name, msg_payload.encode(), hbmqtt.client.QOS_0
     )
@@ -276,7 +264,7 @@ async def test_helperbot_sendcommand():
         "ret": "ok",
     }
 
-    #mqtt_helperbot.Client.disconnect()
+    # mqtt_helperbot.Client.disconnect()
 
     # Test GetLifeSpan (xml command)
     cmdjson = {
@@ -297,13 +285,11 @@ async def test_helperbot_sendcommand():
     }
 
     mqtt_helperbot.wait_resp_timeout_seconds = (
-        0.2
-    )  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+        0.2  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+    )
     # Send response beforehand
     msg_payload = "<ctl ret='ok' type='Brush' left='4142' total='18000'/>"
-    msg_topic_name = (
-        "iot/p2p/GetLifeSpan/bot_serial/ls1ok3/wC3g/helperbot/bumper/helperbot/p/testx/q"
-    )
+    msg_topic_name = "iot/p2p/GetLifeSpan/bot_serial/ls1ok3/wC3g/helperbot/bumper/helperbot/p/testx/q"
     await mqtt_helperbot.Client.publish(
         msg_topic_name, msg_payload.encode(), hbmqtt.client.QOS_0
     )
@@ -321,12 +307,7 @@ async def test_helperbot_sendcommand():
         "payloadType": "j",
         "toRes": "wC3g",
         "payload": {
-            "header": {
-            "pri": 1,
-            "ts": "1569380075887",
-            "tzm": -240,
-            "ver": "0.0.50"
-        }
+            "header": {"pri": 1, "ts": "1569380075887", "tzm": -240, "ver": "0.0.50"}
         },
         "td": "q",
         "toId": "bot_serial",
@@ -341,11 +322,11 @@ async def test_helperbot_sendcommand():
     }
 
     mqtt_helperbot.wait_resp_timeout_seconds = (
-        0.2
-    )  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+        0.2  # Override wait_resp_timeout (so we don't wait 10 seconds for timeout)
+    )
     # Send response beforehand
     msg_payload = '{"body":{"code":0,"data":{"area":0,"cid":"111","start":"1569378657","time":6,"type":"auto"},"msg":"ok"},"header":{"fwVer":"1.6.4","hwVer":"0.1.1","pri":1,"ts":"1569380074036","tzm":480,"ver":"0.0.1"}}'
-    
+
     msg_topic_name = (
         "iot/p2p/getStats/bot_serial/ls1ok3/wC3g/helperbot/bumper/helperbot/p/testj/j"
     )
@@ -357,14 +338,33 @@ async def test_helperbot_sendcommand():
 
     assert commandresult == {
         "id": "testj",
-        "resp": {'body':{'code':0,'data':{'area':0,'cid':'111','start':'1569378657','time':6,'type':'auto'},'msg':'ok'},'header':{'fwVer':'1.6.4','hwVer':'0.1.1','pri':1,'ts':'1569380074036','tzm':480,'ver':'0.0.1'}},
+        "resp": {
+            "body": {
+                "code": 0,
+                "data": {
+                    "area": 0,
+                    "cid": "111",
+                    "start": "1569378657",
+                    "time": 6,
+                    "type": "auto",
+                },
+                "msg": "ok",
+            },
+            "header": {
+                "fwVer": "1.6.4",
+                "hwVer": "0.1.1",
+                "pri": 1,
+                "ts": "1569380074036",
+                "tzm": 480,
+                "ver": "0.0.1",
+            },
+        },
         "ret": "ok",
     }
 
     mqtt_helperbot.Client.disconnect()
 
     await mqtt_server.broker.shutdown()
-    
 
 
 async def test_mqttserver():
@@ -375,8 +375,10 @@ async def test_mqttserver():
 
     mqtt_address = ("127.0.0.1", 8883)
 
-    mqtt_server = bumper.MQTTServer(mqtt_address, password_file="tests/passwd", allow_anonymous=True)
-    
+    mqtt_server = bumper.MQTTServer(
+        mqtt_address, password_file="tests/passwd", allow_anonymous=True
+    )
+
     await mqtt_server.broker_coro()
 
     # Test helperbot connect
@@ -398,7 +400,7 @@ async def test_mqttserver():
     )
 
     await test_client.Client.connect(
-        "mqtts://{}:{}/".format(test_client.address[0], test_client.address[1]),
+        f"mqtts://{test_client.address[0]}:{test_client.address[1]}/",
         cafile=bumper.ca_cert,
     )
     assert (
@@ -423,13 +425,19 @@ async def test_mqttserver():
     test_client.client_id = "test-file-auth"
     # await test_client.start_helper_bot()
     test_client.Client = hbmqtt.client.MQTTClient(
-        client_id=test_client.client_id, config={"check_hostname": False, "auto_reconnect": False, "reconnect_retries": 1}
+        client_id=test_client.client_id,
+        config={
+            "check_hostname": False,
+            "auto_reconnect": False,
+            "reconnect_retries": 1,
+        },
     )
 
     # good user/pass
     await test_client.Client.connect(
         f"mqtts://test-client:abc123!@{test_client.address[0]}:{test_client.address[1]}/",
-        cafile=bumper.ca_cert, cleansession=True
+        cafile=bumper.ca_cert,
+        cleansession=True,
     )
 
     assert (
@@ -439,43 +447,58 @@ async def test_mqttserver():
     assert (
         test_client.Client._connected_state._value == False
     )  # Check client is disconnected
-    
+
     # bad password
     with LogCapture() as l:
-        
+
         await test_client.Client.connect(
             f"mqtts://test-client:notvalid!@{test_client.address[0]}:{test_client.address[1]}/",
-            cafile=bumper.ca_cert, cleansession=True
+            cafile=bumper.ca_cert,
+            cleansession=True,
         )
 
         l.check_present(
-                ("mqttserver", "INFO", "File Authentication Failed - Username: test-client - ClientID: test-file-auth"),
-                order_matters=False
-            )
-    # no username in file    
+            (
+                "mqttserver",
+                "INFO",
+                "File Authentication Failed - Username: test-client - ClientID: test-file-auth",
+            ),
+            order_matters=False,
+        )
+        # no username in file
         await test_client.Client.connect(
             f"mqtts://test-client-noexist:notvalid!@{test_client.address[0]}:{test_client.address[1]}/",
-            cafile=bumper.ca_cert, cleansession=True
+            cafile=bumper.ca_cert,
+            cleansession=True,
         )
-
 
         l.check_present(
-            ("mqttserver", "INFO", 'File Authentication Failed - No Entry for Username: test-client-noexist - ClientID: test-file-auth'),
-            order_matters=False
+            (
+                "mqttserver",
+                "INFO",
+                "File Authentication Failed - No Entry for Username: test-client-noexist - ClientID: test-file-auth",
+            ),
+            order_matters=False,
         )
-    
+
     await mqtt_server.broker.shutdown()
-    
+
 
 async def test_nofileauth_mqttserver():
     with LogCapture() as l:
-        
+
         mqtt_address = ("127.0.0.1", 8883)
-        mqtt_server = bumper.MQTTServer(mqtt_address, password_file="tests/passwd-notfound")
+        mqtt_server = bumper.MQTTServer(
+            mqtt_address, password_file="tests/passwd-notfound"
+        )
         await mqtt_server.broker_coro()
-        await mqtt_server.broker.shutdown()        
+        await mqtt_server.broker.shutdown()
 
     l.check_present(
-        ("hbmqtt.broker.plugins.bumper", "WARNING", 'Password file tests/passwd-notfound not found'),
-        order_matters=False
+        (
+            "hbmqtt.broker.plugins.bumper",
+            "WARNING",
+            "Password file tests/passwd-notfound not found",
+        ),
+        order_matters=False,
     )
