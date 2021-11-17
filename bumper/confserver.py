@@ -13,8 +13,8 @@ import jinja2
 from aiohttp import web
 
 import bumper
-from .models import EcoVacsHome_Login, EcoVacs_Login, API_ERRORS, RETURN_API_SUCCESS
 
+from .models import API_ERRORS, RETURN_API_SUCCESS, EcoVacs_Login, EcoVacsHome_Login
 from .util import get_logger
 
 
@@ -614,6 +614,7 @@ class ConfServer:
                 confserverlog.exception(f"{e}")
 
         async def get_AuthCode(self, request):
+            """Get auth code."""
             try:
                 apptype = request.match_info.get("apptype", "")
                 user_devid = request.match_info.get("devid", "")  # Ecovacs
@@ -678,6 +679,7 @@ class ConfServer:
                 confserverlog.exception(f"{e}")
 
         def check_token(self, apptype, countrycode, user, token):
+            """Verify token."""
             try:
                 if bumper.check_token(user["userid"], token):
 
@@ -806,6 +808,7 @@ class ConfServer:
                 confserverlog.exception(f"{e}")
 
         def getUserAccountInfo(self, request):
+            """Get user account info."""
             try:
                 user_devid = request.match_info.get("devid", "")
                 countrycode = request.match_info.get("country", "us")
@@ -874,6 +877,7 @@ class ConfServer:
                 confserverlog.exception(f"{e}")
 
         async def logout(self, request):
+            """logout."""
             try:
                 user_devid = request.match_info.get("devid", "")
                 if not user_devid == "":

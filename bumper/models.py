@@ -7,6 +7,8 @@ import bumper
 
 
 class VacBotDevice:
+    """VacBotDevice representation."""
+
     def __init__(
         self, did="", vac_bot_device_class="", resource="", name="", nick="", company=""
     ):
@@ -20,6 +22,7 @@ class VacBotDevice:
         self.xmpp_connection = False
 
     def asdict(self):
+        """Get dict."""
         return {
             "class": self.vac_bot_device_class,
             "company": self.company,
@@ -33,16 +36,21 @@ class VacBotDevice:
 
 
 class BumperUser:
+    """BumperUser representation."""
+
     def __init__(self, userid=""):
         self.userid = userid
         self.devices = []
         self.bots = []
 
     def asdict(self):
+        """Get dict."""
         return {"userid": self.userid, "devices": self.devices, "bots": self.bots}
 
 
 class GlobalVacBotDevice(VacBotDevice):  # EcoVacs Home
+    """GlobalVacBotDevice representation."""
+
     UILogicId = ""
     ota = True
     updateInfo = {"changeLog": "", "needUpdate": False}
@@ -51,6 +59,8 @@ class GlobalVacBotDevice(VacBotDevice):  # EcoVacs Home
 
 
 class VacBotClient:
+    """VacBotClient representation."""
+
     def __init__(self, userid="", realm="", token=""):
         self.userid = userid
         self.realm = realm
@@ -59,6 +69,7 @@ class VacBotClient:
         self.xmpp_connection = False
 
     def asdict(self):
+        """Get dict."""
         return {
             "userid": self.userid,
             "realm": self.realm,
@@ -69,6 +80,8 @@ class VacBotClient:
 
 
 class EcoVacs_Login:
+    """EcoVacs_Login representation."""
+
     accessToken = ""
     country = ""
     email = ""
@@ -76,18 +89,23 @@ class EcoVacs_Login:
     username = ""
 
     def toJSON(self):
+        """Get json string."""
         return json.dumps(
             self, default=lambda o: o.__dict__, sort_keys=False
         )  # , indent=4)
 
 
 class EcoVacsHome_Login(EcoVacs_Login):
+    """EcoVacsHome_Login representation."""
+
     loginName = ""
     mobile = ""
     ucUid = ""
 
 
 class OAuth:
+    """OAuth representation."""
+
     access_token = ""
     expire_at = ""
     refresh_token = ""
