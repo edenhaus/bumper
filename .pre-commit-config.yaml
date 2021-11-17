@@ -86,4 +86,3 @@ repos:
         types: [python]
         require_serial: true
         <<: *python-files
-

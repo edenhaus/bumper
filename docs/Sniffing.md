@@ -1,7 +1,7 @@
-Reverse engineering the protocols and default apps/APIs requires some patience and work.  I've found using a Kali Linux VM that hosts an access point with MitMProxy works well.  I followed a number of articles in order to get started, which helped in creating the below VM setup and scripts.
+Reverse engineering the protocols and default apps/APIs requires some patience and work. I've found using a Kali Linux VM that hosts an access point with MitMProxy works well. I followed a number of articles in order to get started, which helped in creating the below VM setup and scripts.
 
 > References:
-> 
+>
 > - https://blog.heckel.xyz/2013/07/01/how-to-use-mitmproxy-to-read-and-modify-https-traffic-of-your-phone/
 > - https://docs.mitmproxy.org/stable/howto-wireshark-tls/
 > - https://www.yeahhub.com/create-fake-ap-dnsmasq-hostapd-kali-linux/
@@ -80,13 +80,11 @@ Run Start_Sniff.sh to begin. Ensure the bot and apps connect via the Wifi networ
 - For XMPP/MQTT you will need to use WireShark.
   - Ensure you point WireShark at the sslmitmkeylog file in order to decrypt any encrypted communications.
 
-
-This documentation won't go into the details of reviewing the logs/traffic.  The reader will need to identify how to use WireShark etc for this.
-
+This documentation won't go into the details of reviewing the logs/traffic. The reader will need to identify how to use WireShark etc for this.
 
 ## XMPPPeek - MITM XMPP traffic between the Android or iOS App and the Ecovacs server
 
-###### *Stolen from the [Sucks Documentation](https://github.com/wpietri/sucks/blob/master/developing.md#mitm-xmpp-traffic-between-the-android-or-ios-app-and-the-ecovacs-server)*
+###### _Stolen from the [Sucks Documentation](https://github.com/wpietri/sucks/blob/master/developing.md#mitm-xmpp-traffic-between-the-android-or-ios-app-and-the-ecovacs-server)_
 
 XMPPPeek can also be used to man in the middle the traffic between the Android/iOS App and the Ecovacs server.
 
@@ -100,10 +98,9 @@ XMPPPeek can also be used to man in the middle the traffic between the Android/i
 1. Look at the [DNS docs](DNS_Setup.md) for information on which Ecovacs XMPP server is the right one for your Country. For example, a US user will be using `msg-na.ecouser.net`. Find and note the IP address for the server.
 
 1. Make sure the mobile App talks to your machine instead of the server. This can be
-accomplished modifying your router's DNS configuration to have the Ecovacs domain
-name point to your IP.
+   accomplished modifying your router's DNS configuration to have the Ecovacs domain
+   name point to your IP.
 
 1. Run xmppeek as follows.
 
 `python ./xmpppeek.py <ECOVACS XMPP SERVER IP> cert.pem key.pem`
-

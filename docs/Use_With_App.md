@@ -1,6 +1,6 @@
-# Using Bumper with the official Android/iOS App 
+# Using Bumper with the official Android/iOS App
 
-Bumper *can* be used with the official "Ecovacs" or "Ecovacs Home" app, but with limitations. Your phone needs to use your DNS server with custom settings, and you ***must*** import Bumper's CA cert and trust it before the app will work.
+Bumper _can_ be used with the official "Ecovacs" or "Ecovacs Home" app, but with limitations. Your phone needs to use your DNS server with custom settings, and you **_must_** import Bumper's CA cert and trust it before the app will work.
 
 **Steps**
 
@@ -17,33 +17,33 @@ Bumper *can* be used with the official "Ecovacs" or "Ecovacs Home" app, but with
 ![Example of emailing CA cert](images/emailcert.png)
 
 - Import the cert as a CA, and trust it
-	- Instructions for [iOS](#importing-the-ca-cert-on-ios)
-	- Instruction for [Android](#importing-the-ca-cert-on-android)
+  - Instructions for [iOS](#importing-the-ca-cert-on-ios)
+  - Instruction for [Android](#importing-the-ca-cert-on-android)
 
-----
+---
 
 ### Importing the CA Cert on iOS
 
 1. Open the e-mail on your iOS device, and click the attached cert
-![Example of email on iOS device](images/ios_email_cert.png)
+   ![Example of email on iOS device](images/ios_email_cert.png)
 
 1. Install the profile by clicking "Install", and entering your pass code if prompted
-![Example of install profile on iOS device](images/ios_install_profile.png)
+   ![Example of install profile on iOS device](images/ios_install_profile.png)
 
 1. Accept the certificate warning by clicking "Install" again
-![Example of cert warning on iOS device](images/ios_cert_warning_install.png)
+   ![Example of cert warning on iOS device](images/ios_cert_warning_install.png)
 
 1. Click "Done" to exit the profile installation
 1. Go to Settings > General > About
 1. Scroll to the bottom and click "Certificate Trust Settings"
 1. Enable Full Trust for the Bumper CA Cert, by moving the slider to the right
-![Example of enable trust cert on iOS device](images/ios_cert_trust.png)
-![Example of enable trust cert on iOS device 2](images/ios_cert_trust_continue.png)
+   ![Example of enable trust cert on iOS device](images/ios_cert_trust.png)
+   ![Example of enable trust cert on iOS device 2](images/ios_cert_trust_continue.png)
 
 1. Click continue when prompted
 1. That's it, you can now [Use the app](#use-the-app)
 
-----
+---
 
 ### Importing the CA Cert on Android
 
@@ -89,11 +89,11 @@ After reboot, verify that the certificate was added by checking `Settings > Secu
 
 Now, start [using the app](#use-the-app).
 
-----
+---
 
 ### Use the app
- 
- - Open the app
- - At this time there is no authentication layer, you can enter any e-mail address and password (as long as it is 6 characters) and you will be authenticated
- - If your robot has already checked into Bumper, then it will be available in the list of robots  
+
+- Open the app
+- At this time there is no authentication layer, you can enter any e-mail address and password (as long as it is 6 characters) and you will be authenticated
+- If your robot has already checked into Bumper, then it will be available in the list of robots
 - The app now does a ping to the robot to make sure it is online, and if it is you can now control the robot

@@ -1,6 +1,6 @@
 # Using Bumper with Sucks
 
-At this time you'll need to use the bmartin5692 fork of sucks.  Especially if you have a newer bot like an Ozmo.
+At this time you'll need to use the bmartin5692 fork of sucks. Especially if you have a newer bot like an Ozmo.
 
 - Download and install [Sucks](https://github.com/bmartin5692/sucks)
 
