@@ -1,6 +1,6 @@
 mypy==0.942
 pre-commit==2.18.1
-pylint==2.13.5
+pylint==2.13.8
 pytest==7.1.1
 pytest-aiohttp==1.0.4
 pytest-asyncio==0.18.3
