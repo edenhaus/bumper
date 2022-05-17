@@ -2,7 +2,7 @@ aiohttp==3.8.1
 aiohttp-jinja2==1.5
 git+https://github.com/edenhaus/amqtt@test#amqtt==11.0.0
 # amqtt==0.10.0
-cachetools==5.0.0
+cachetools==5.1.0
 gmqtt==0.6.11
 Jinja2==3.1.1
 tinydb==4.7.0
