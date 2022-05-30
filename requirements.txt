@@ -1,6 +1,6 @@
 aiohttp==3.8.1
 aiohttp-jinja2==1.5
-cachetools==5.1.0
+cachetools==5.2.0
 git+https://github.com/Yakifo/amqtt@master#amqtt==11.0.0
 gmqtt==0.6.11
 Jinja2==3.1.2
