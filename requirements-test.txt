@@ -8,5 +8,5 @@ pytest-cov==3.0.0
 pytest-env==0.6.2
 pytest-timeout==2.1.0
 testfixtures==6.18.5
-types-cachetools==5.0.1
+types-cachetools==5.0.2
 types-setuptools==57.4.14
