@@ -9,4 +9,4 @@ pytest-env==0.6.2
 pytest-timeout==2.1.0
 testfixtures==7.0.0
 types-cachetools==5.2.1
-types-setuptools==64.0.1
+types-setuptools==65.3.0
