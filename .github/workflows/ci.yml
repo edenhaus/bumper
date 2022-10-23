@@ -90,4 +90,4 @@ jobs:
         run: |
           docker buildx build --push \
           --tag ghcr.io/edenhaus/bumper:${{ steps.tag_name.outputs.tag }} \
-          --platform linux/amd64,linux/arm/v7,linux/arm64 .
+          --platform linux/amd64 .
