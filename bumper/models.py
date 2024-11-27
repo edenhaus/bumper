@@ -18,8 +18,9 @@ class VacBotDevice:
         name: str = "",
         nick: str = "",
         company: str = "",
+        **kwargs: Any,
     ):
-        self.vac_bot_device_class = vac_bot_device_class
+        self.vac_bot_device_class = vac_bot_device_class or kwargs.get("class", "")
         self.company = company
         self.did = did
         self.name = name

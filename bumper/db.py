@@ -338,7 +338,8 @@ def revoke_expired_tokens() -> None:
 
 def bot_add(sn: str, did: str, dev_class: str, resource: str, company: str) -> None:
     """Add bot."""
-    new_bot = VacBotDevice()
+    bot = bot_get(did) or {}
+    new_bot = VacBotDevice(**bot)
     new_bot.did = did
     new_bot.name = sn
     new_bot.vac_bot_device_class = dev_class
